@@ -1,0 +1,107 @@
+{
+  "name": "Jane Wanjiku Kamau",
+  "email": "jane.kamau@gmail.com",
+  "phone": "+254 712 345 678",
+  "location": "Nairobi, Kenya",
+  "linkedin": "linkedin.com/in/janekamau",
+
+  "target_roles": [
+    "Data Analyst",
+    "Business Intelligence Analyst",
+    "Research Analyst",
+    "Programme Officer"
+  ],
+
+  "target_sectors": [
+    "Development Finance",
+    "NGO / INGO",
+    "Government / Public Sector",
+    "Technology"
+  ],
+
+  "min_salary_ksh": 120000,
+  "work_preferences": ["hybrid", "remote"],
+  "locations_ok": ["Nairobi", "Remote"],
+
+  "summary": "Results-driven Data Analyst with 5+ years translating complex datasets into strategic decisions across public health, finance, and agriculture sectors in East Africa.",
+
+  "education": [
+    {
+      "degree": "MSc Statistics",
+      "institution": "University of Nairobi",
+      "year": 2020,
+      "grade": "Distinction"
+    },
+    {
+      "degree": "BSc Mathematics & Computer Science",
+      "institution": "Strathmore University",
+      "year": 2017,
+      "grade": "First Class Honours"
+    }
+  ],
+
+  "experience": [
+    {
+      "title": "Senior Data Analyst",
+      "company": "Kenya Revenue Authority",
+      "dates": "2021 – Present",
+      "bullets": [
+        "Built automated ETL pipelines in Python reducing reporting time from 3 days to 4 hours",
+        "Developed a taxpayer compliance prediction model (XGBoost) with 89% accuracy, flagging KSh 2.1B in under-reported income",
+        "Led a team of 4 analysts delivering monthly dashboards to 12 executive stakeholders",
+        "Migrated legacy Access databases to PostgreSQL, improving query performance by 300%"
+      ]
+    },
+    {
+      "title": "Data Analyst",
+      "company": "Kenya Red Cross Society",
+      "dates": "2019 – 2021",
+      "bullets": [
+        "Analysed beneficiary data across 8 counties to optimise food distribution for 45,000+ households",
+        "Built Power BI dashboards used in quarterly donor reporting (USAID, ECHO)",
+        "Cleaned and geocoded 120,000-row household survey dataset for drought response programme"
+      ]
+    }
+  ],
+
+  "skills": {
+    "technical": [
+      "Python (pandas, scikit-learn, matplotlib)",
+      "SQL (PostgreSQL, MySQL)",
+      "Power BI", "Tableau",
+      "R", "Excel (advanced)",
+      "ETL / data pipelines",
+      "Machine learning",
+      "GIS / QGIS",
+      "Git"
+    ],
+    "soft": [
+      "Stakeholder communication",
+      "Report writing",
+      "Team leadership",
+      "Project management",
+      "Presentation skills"
+    ],
+    "languages": ["English (fluent)", "Swahili (native)"]
+  },
+
+  "certifications": [
+    "Google Data Analytics Professional Certificate (2022)",
+    "Microsoft PL-300 Power BI Data Analyst (2023)",
+    "UNHCR Data for Development Certificate (2021)"
+  ],
+
+  "notable_achievements": [
+    "KRA Director General Award for Innovation (2023)",
+    "Published in African Journal of Statistics: 'Mobile Money Data as a Proxy for Household Income' (2022)"
+  ],
+
+  "referees": [
+    {
+      "name": "Dr. Alice Mwangi",
+      "title": "Head of Research, Kenya Revenue Authority",
+      "email": "a.mwangi@kra.go.ke",
+      "phone": "+254 722 000 001"
+    }
+  ]
+}

@@ -1,0 +1,254 @@
+{
+  "name": "Job Hunter KE — Full Automation Workflow",
+  "nodes": [
+    {
+      "id": "trigger-jobs",
+      "name": "⏰ Jobs — Every 6h",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "parameters": {
+        "rule": { "interval": [{ "field": "hours", "hoursInterval": 6 }] }
+      },
+      "position": [80, 200]
+    },
+    {
+      "id": "scrape-jobs",
+      "name": "🔍 Scrape Job Boards",
+      "type": "n8n-nodes-base.httpRequest",
+      "parameters": {
+        "method": "POST",
+        "url": "http://localhost:5055/scrape",
+        "sendBody": true,
+        "contentType": "json",
+        "body": {
+          "keywords": ["data analyst", "M&E officer", "programme officer", "software engineer", "research officer"],
+          "sources":  ["neaims", "gaa", "brightermonday", "myjobmag", "fuzu", "jobwebkenya", "ngojobskenya", "linkedin", "reddit"]
+        }
+      },
+      "position": [300, 200]
+    },
+    {
+      "id": "check-new-jobs",
+      "name": "📊 New Jobs?",
+      "type": "n8n-nodes-base.if",
+      "parameters": {
+        "conditions": {
+          "number": [{ "value1": "={{$json.new}}", "operation": "larger", "value2": 0 }]
+        }
+      },
+      "position": [520, 200]
+    },
+    {
+      "id": "gen-job-docs",
+      "name": "🤖 Generate Job Docs (AI)",
+      "type": "n8n-nodes-base.httpRequest",
+      "parameters": {
+        "method": "POST",
+        "url": "http://localhost:5055/generate-docs",
+        "sendBody": true,
+        "contentType": "json",
+        "body": { "max": 15 }
+      },
+      "position": [740, 160]
+    },
+    {
+      "id": "notify-jobs",
+      "name": "📬 Email — New Jobs Ready",
+      "type": "n8n-nodes-base.emailSend",
+      "parameters": {
+        "toEmail": "your@email.com",
+        "subject": "🇰🇪 Job Hunter: {{$node['🔍 Scrape Job Boards'].json.new}} new jobs ready",
+        "emailType": "html",
+        "message": "<h2>💼 New Jobs Ready for Review</h2><p><b>{{$node['🔍 Scrape Job Boards'].json.new}}</b> new jobs scraped and AI docs generated.</p><p>Processed: {{$json.processed}} application packages.</p><p><a href='http://localhost:3001'>Open Review Dashboard →</a></p><hr><small>Sources: {{$node['🔍 Scrape Job Boards'].json.sources}}</small>"
+      },
+      "position": [960, 160]
+    },
+
+    {
+      "id": "trigger-scholarships-weekly",
+      "name": "⏰ Scholarships — Weekly (Mon 8am)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "parameters": {
+        "rule": {
+          "interval": [{
+            "field": "weeks",
+            "weeksInterval": 1,
+            "triggerAtDay": [1],
+            "triggerAtHour": 8
+          }]
+        }
+      },
+      "position": [80, 500]
+    },
+    {
+      "id": "scrape-all-scholarships",
+      "name": "🎓 Scrape All Scholarships",
+      "type": "n8n-nodes-base.httpRequest",
+      "parameters": {
+        "method": "POST",
+        "url": "http://localhost:5055/scholarships/scrape",
+        "sendBody": true,
+        "contentType": "json",
+        "body": {
+          "keywords": ["data science", "public health", "development", "statistics", "agriculture", "economics"],
+          "funding_filter": "fully_funded"
+        }
+      },
+      "position": [300, 500]
+    },
+    {
+      "id": "check-new-schol",
+      "name": "📊 New Scholarships?",
+      "type": "n8n-nodes-base.if",
+      "parameters": {
+        "conditions": {
+          "number": [{ "value1": "={{$json.new}}", "operation": "larger", "value2": 0 }]
+        }
+      },
+      "position": [520, 500]
+    },
+    {
+      "id": "gen-schol-docs",
+      "name": "🤖 Generate Scholarship Docs (AI)",
+      "type": "n8n-nodes-base.httpRequest",
+      "parameters": {
+        "method": "POST",
+        "url": "http://localhost:5055/scholarships/generate-docs",
+        "sendBody": true,
+        "contentType": "json",
+        "body": { "max": 8 }
+      },
+      "position": [740, 460]
+    },
+    {
+      "id": "notify-scholarships",
+      "name": "📬 Email — New Scholarships Ready",
+      "type": "n8n-nodes-base.emailSend",
+      "parameters": {
+        "toEmail": "your@email.com",
+        "subject": "🎓 Job Hunter: {{$node['🎓 Scrape All Scholarships'].json.new}} new scholarships ready",
+        "emailType": "html",
+        "message": "<h2>🎓 New Scholarships Ready for Review</h2><p><b>{{$node['🎓 Scrape All Scholarships'].json.new}}</b> new scholarships found.</p><p>AI packages generated for: <b>{{$json.processed}}</b></p><p><a href='http://localhost:3001'>Open Review Dashboard →</a></p><hr><p><b>Tip:</b> Check the Scholarships tab — sorted by match score.</p>"
+      },
+      "position": [960, 460]
+    },
+
+    {
+      "id": "trigger-scholarships-daily",
+      "name": "⏰ Aggregators — Daily 7am",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "parameters": {
+        "rule": {
+          "interval": [{ "field": "days", "daysInterval": 1, "triggerAtHour": 7 }]
+        }
+      },
+      "position": [80, 700]
+    },
+    {
+      "id": "scrape-aggregators",
+      "name": "📡 Scrape Aggregators (Daily)",
+      "type": "n8n-nodes-base.httpRequest",
+      "parameters": {
+        "method": "POST",
+        "url": "http://localhost:5055/scholarships/scrape",
+        "sendBody": true,
+        "contentType": "json",
+        "body": {
+          "keywords": ["fully funded scholarship africa", "masters scholarship kenya 2025", "phd scholarship developing countries"],
+          "sources": ["scholars4dev", "scholarshipdb", "opportunitiesforafricans", "afterschoolafrica", "scholarshippositions", "opportunitiescircle", "opportunitiesworld"]
+        }
+      },
+      "position": [300, 700]
+    },
+
+    {
+      "id": "trigger-dispatch",
+      "name": "⏰ Dispatch Check — Every 2h",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "parameters": {
+        "rule": { "interval": [{ "field": "hours", "hoursInterval": 2 }] }
+      },
+      "position": [80, 900]
+    },
+    {
+      "id": "get-approved-jobs",
+      "name": "✅ Get Approved Jobs",
+      "type": "n8n-nodes-base.httpRequest",
+      "parameters": {
+        "method": "GET",
+        "url": "http://localhost:5055/jobs/approved/pending-dispatch"
+      },
+      "position": [300, 860]
+    },
+    {
+      "id": "send-job-email",
+      "name": "📧 Send Job Application Email",
+      "type": "n8n-nodes-base.emailSend",
+      "parameters": {
+        "toEmail": "={{$json.application_email}}",
+        "subject": "Application: ={{$json.title}} — ={{$json.company}}",
+        "emailType": "text",
+        "message": "={{$json.cover_letter}}"
+      },
+      "position": [520, 860]
+    },
+    {
+      "id": "mark-job-dispatched",
+      "name": "🚀 Mark Job Dispatched",
+      "type": "n8n-nodes-base.httpRequest",
+      "parameters": {
+        "method": "POST",
+        "url": "=http://localhost:5055/jobs/{{$json.id}}/mark-dispatched"
+      },
+      "position": [740, 860]
+    },
+    {
+      "id": "get-approved-schol",
+      "name": "✅ Get Approved Scholarships",
+      "type": "n8n-nodes-base.httpRequest",
+      "parameters": {
+        "method": "GET",
+        "url": "http://localhost:5055/scholarships/approved/pending-dispatch"
+      },
+      "position": [300, 960]
+    },
+    {
+      "id": "notify-schol-approved",
+      "name": "📧 Notify — Scholarship to Submit",
+      "type": "n8n-nodes-base.emailSend",
+      "parameters": {
+        "toEmail": "your@email.com",
+        "subject": "🎓 ACTION REQUIRED: Submit ={{$json.title}}",
+        "emailType": "html",
+        "message": "<h2>Scholarship Ready to Submit</h2><p><b>={{$json.title}}</b></p><p>Funder: ={{$json.funder_country}}<br>Deadline: <b>={{$json.deadline}}</b><br>Coverage: ={{$json.coverage}}</p><p><a href='={{$json.url}}'>Apply here →</a></p><hr><p>Your application package has been prepared. Review it in the dashboard before submitting.</p>"
+      },
+      "position": [520, 960]
+    },
+    {
+      "id": "mark-schol-dispatched",
+      "name": "🚀 Mark Scholarship Dispatched",
+      "type": "n8n-nodes-base.httpRequest",
+      "parameters": {
+        "method": "POST",
+        "url": "=http://localhost:5055/scholarships/{{$json.id}}/mark-dispatched"
+      },
+      "position": [740, 960]
+    }
+  ],
+
+  "connections": {
+    "⏰ Jobs — Every 6h":              { "main": [[{ "node": "🔍 Scrape Job Boards",           "type": "main", "index": 0 }]] },
+    "🔍 Scrape Job Boards":            { "main": [[{ "node": "📊 New Jobs?",                    "type": "main", "index": 0 }]] },
+    "📊 New Jobs?":                    { "main": [[{ "node": "🤖 Generate Job Docs (AI)",       "type": "main", "index": 0 }], []] },
+    "🤖 Generate Job Docs (AI)":       { "main": [[{ "node": "📬 Email — New Jobs Ready",       "type": "main", "index": 0 }]] },
+    "⏰ Scholarships — Weekly (Mon 8am)": { "main": [[{ "node": "🎓 Scrape All Scholarships",   "type": "main", "index": 0 }]] },
+    "🎓 Scrape All Scholarships":      { "main": [[{ "node": "📊 New Scholarships?",            "type": "main", "index": 0 }]] },
+    "📊 New Scholarships?":            { "main": [[{ "node": "🤖 Generate Scholarship Docs (AI)", "type": "main", "index": 0 }], []] },
+    "🤖 Generate Scholarship Docs (AI)": { "main": [[{ "node": "📬 Email — New Scholarships Ready", "type": "main", "index": 0 }]] },
+    "⏰ Aggregators — Daily 7am":      { "main": [[{ "node": "📡 Scrape Aggregators (Daily)",   "type": "main", "index": 0 }]] },
+    "⏰ Dispatch Check — Every 2h":    { "main": [[{ "node": "✅ Get Approved Jobs",             "type": "main", "index": 0 }, { "node": "✅ Get Approved Scholarships", "type": "main", "index": 0 }]] },
+    "✅ Get Approved Jobs":            { "main": [[{ "node": "📧 Send Job Application Email",    "type": "main", "index": 0 }]] },
+    "📧 Send Job Application Email":   { "main": [[{ "node": "🚀 Mark Job Dispatched",           "type": "main", "index": 0 }]] },
+    "✅ Get Approved Scholarships":    { "main": [[{ "node": "📧 Notify — Scholarship to Submit","type": "main", "index": 0 }]] },
+    "📧 Notify — Scholarship to Submit": { "main": [[{ "node": "🚀 Mark Scholarship Dispatched","type": "main", "index": 0 }]] }
+  }
+}

@@ -1,0 +1,127 @@
+{
+  "name": "Job Hunter KE — Daily Reminder Digest",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [{ "field": "cronExpression", "expression": "0 8 * * 1-5" }]
+        }
+      },
+      "id": "cron-trigger",
+      "name": "Every Weekday at 8am",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "url": "={{ $env.JH_API_BASE_URL }}/reminders/upcoming",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            { "name": "deadline_days", "value": "={{ $env.JH_DEADLINE_DAYS || 7 }}" },
+            { "name": "stale_hours",   "value": "={{ $env.JH_STALE_HOURS || 48 }}" }
+          ]
+        },
+        "options": { "timeout": 15000 }
+      },
+      "id": "fetch-reminders",
+      "name": "Fetch Upcoming Reminders",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [460, 300],
+      "credentials": { "httpHeaderAuth": { "id": "jh-api-key", "name": "JH API Key" } }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": false, "leftValue": "", "typeValidation": "strict" },
+          "conditions": [
+            {
+              "id": "has-items",
+              "leftValue": "={{ $json.summary.expiring_jobs + $json.summary.expiring_scholarships + $json.summary.stale_jobs + $json.summary.stale_schols }}",
+              "rightValue": 0,
+              "operator": { "type": "number", "operation": "gt" }
+            }
+          ]
+        }
+      },
+      "id": "check-has-items",
+      "name": "Any Items?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "url": "={{ $env.JH_API_BASE_URL }}/reminders/send-digest",
+        "method": "POST",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            { "name": "deadline_days", "value": "={{ $env.JH_DEADLINE_DAYS || 7 }}" },
+            { "name": "stale_hours",   "value": "={{ $env.JH_STALE_HOURS || 48 }}" }
+          ]
+        },
+        "options": { "timeout": 15000 }
+      },
+      "id": "send-digest",
+      "name": "Send Digest Email",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [900, 220],
+      "credentials": { "httpHeaderAuth": { "id": "jh-api-key", "name": "JH API Key" } }
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            { "name": "reason", "value": "No items with upcoming deadlines or stale approvals — digest skipped." }
+          ]
+        }
+      },
+      "id": "no-op-skip",
+      "name": "Skip — Nothing to Report",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3,
+      "position": [900, 420]
+    }
+  ],
+  "connections": {
+    "Every Weekday at 8am":       { "main": [[{ "node": "Fetch Upcoming Reminders", "type": "main", "index": 0 }]] },
+    "Fetch Upcoming Reminders":   { "main": [[{ "node": "Any Items?",              "type": "main", "index": 0 }]] },
+    "Any Items?": {
+      "main": [
+        [{ "node": "Send Digest Email",          "type": "main", "index": 0 }],
+        [{ "node": "Skip — Nothing to Report",   "type": "main", "index": 0 }]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "errorWorkflow": ""
+  },
+  "meta": {
+    "templateCredsSetupCompleted": false,
+    "instanceId": "jobhunterke"
+  },
+  "__comment": [
+    "SETUP INSTRUCTIONS:",
+    "1. In n8n → Credentials → New → HTTP Header Auth:",
+    "   Name: 'JH API Key'",
+    "   Name (header): X-API-Key",
+    "   Value: your API key from Settings page",
+    "2. In n8n → Settings → Environment Variables (or .env):",
+    "   JH_API_BASE_URL = http://your-api-host:5055",
+    "   JH_DEADLINE_DAYS = 7   (override per user preference)",
+    "   JH_STALE_HOURS   = 48",
+    "3. Import this file via n8n → Workflows → Import",
+    "4. Activate the workflow"
+  ]
+}

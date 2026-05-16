@@ -1,0 +1,135 @@
+{
+  "name": "Job Hunter KE — Gmail Reply Handler",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": { "item": [{ "mode": "everyMinute" }] },
+        "filters": {
+          "sender": "",
+          "subject": "",
+          "readStatus": "unread",
+          "labels": ["INBOX"]
+        },
+        "options": { "downloadAttachments": false }
+      },
+      "id": "gmail-trigger",
+      "name": "Gmail — New Unread Email",
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1,
+      "position": [240, 300],
+      "credentials": { "gmailOAuth2": { "id": "gmail-oauth", "name": "Gmail Account" } }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Filter: only process emails that look like employer replies\n// Ignore newsletters, n8n itself, automated senders\nconst from = $input.item.json.from || '';\nconst subject = (($input.item.json.subject) || '').toLowerCase();\nconst skipDomains = ['noreply', 'no-reply', 'notifications', 'donotreply', 'mailchimp', 'sendgrid'];\nconst isAutomated = skipDomains.some(d => from.toLowerCase().includes(d));\nconst isApplicationRelated = [\n  'application', 'applicant', 'position', 'role', 'interview',\n  'shortlist', 'candidat', 'offer', 'regret', 'unfortunately',\n  'assessment', 'vacancy', 'hiring'\n].some(kw => subject.includes(kw));\n\nif (isAutomated) return [];\nif (!isApplicationRelated) return []; // drop unrelated emails\nreturn [$input.item];"
+      },
+      "id": "filter-relevant",
+      "name": "Filter — Application Emails Only",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "url": "={{ $env.JH_API_BASE_URL }}/replies/inbound",
+        "method": "POST",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Content-Type", "value": "application/json" },
+            { "name": "X-N8N-Signature", "value": "={{ $env.JH_WEBHOOK_SECRET ? require('crypto').createHmac('sha256', $env.JH_WEBHOOK_SECRET).update(JSON.stringify($json)).digest('hex') : '' }}" }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            { "name": "api_key",      "value": "={{ $env.JH_API_KEY }}" },
+            { "name": "from_email",   "value": "={{ $json.from }}" },
+            { "name": "from_name",    "value": "={{ $json.fromName || $json.from }}" },
+            { "name": "subject",      "value": "={{ $json.subject }}" },
+            { "name": "body_text",    "value": "={{ $json.text || $json.snippet || '' }}" },
+            { "name": "received_at",  "value": "={{ $json.date }}" }
+          ]
+        },
+        "options": { "timeout": 20000 }
+      },
+      "id": "send-to-api",
+      "name": "Send to Job Hunter API",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "conditions": [
+            {
+              "leftValue":  "={{ $json.category }}",
+              "rightValue": "rejection",
+              "operator": { "type": "string", "operation": "notEquals" }
+            },
+            {
+              "leftValue":  "={{ $json.category }}",
+              "rightValue": "acknowledgement",
+              "operator": { "type": "string", "operation": "notEquals" }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "check-category",
+      "name": "Needs Attention?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [900, 300]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $env.JH_REVIEW_EMAIL }}",
+        "subject": "=[Job Hunter KE] {{ $('Filter — Application Emails Only').item.json.fromName || 'Employer' }} replied — {{ $json.category.replace('_',' ') }}",
+        "message": "=<p>You have a new employer reply in your Job Hunter KE dashboard.</p>\n<p><b>From:</b> {{ $('Filter — Application Emails Only').item.json.from }}<br>\n<b>Subject:</b> {{ $('Filter — Application Emails Only').item.json.subject }}<br>\n<b>Category:</b> {{ $json.category.replace('_',' ').toUpperCase() }}</p>\n{{ $json.category === 'interview_invite' ? '<p style=\"color:green\"><b>🎉 This looks like an interview invite!</b></p>' : '' }}\n<p><a href=\"{{ $env.JH_API_BASE_URL }}/jobs?status=approved\">Open Dashboard →</a></p>",
+        "options": { "appendAttribution": false }
+      },
+      "id": "notify-user",
+      "name": "Email — Notify User",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2,
+      "position": [1120, 220],
+      "credentials": { "gmailOAuth2": { "id": "gmail-oauth", "name": "Gmail Account" } }
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [{ "name": "skipped", "value": "rejection or acknowledgement — no notification sent" }]
+        }
+      },
+      "id": "skip-notify",
+      "name": "Skip Notification",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3,
+      "position": [1120, 420]
+    }
+  ],
+  "connections": {
+    "Gmail — New Unread Email":         { "main": [[{ "node": "Filter — Application Emails Only", "type": "main", "index": 0 }]] },
+    "Filter — Application Emails Only": { "main": [[{ "node": "Send to Job Hunter API",           "type": "main", "index": 0 }]] },
+    "Send to Job Hunter API":           { "main": [[{ "node": "Needs Attention?",                 "type": "main", "index": 0 }]] },
+    "Needs Attention?": {
+      "main": [
+        [{ "node": "Email — Notify User",  "type": "main", "index": 0 }],
+        [{ "node": "Skip Notification",    "type": "main", "index": 0 }]
+      ]
+    }
+  },
+  "settings": { "executionOrder": "v1", "saveManualExecutions": true },
+  "__setup": [
+    "1. n8n Credentials → New → Gmail OAuth2 — authorise your Gmail account",
+    "2. n8n Settings → Environment Variables:",
+    "   JH_API_BASE_URL   = http://your-host:5055",
+    "   JH_API_KEY        = your api key",
+    "   JH_REVIEW_EMAIL   = your@email.com",
+    "   JH_WEBHOOK_SECRET = (optional, same as N8N_WEBHOOK_SECRET in backend .env)",
+    "3. Import this file → Activate workflow",
+    "4. The workflow polls Gmail every minute for new unread emails"
+  ]
+}

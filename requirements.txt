@@ -1,0 +1,37 @@
+# ── Core API ─────────────────────────────────────────────────────────────────
+flask>=3.0
+flask-cors>=4.0
+flask-limiter>=3.5
+
+# ── HTTP / Scraping ──────────────────────────────────────────────────────────
+requests>=2.31
+beautifulsoup4>=4.12
+lxml>=5.0
+feedparser>=6.0
+
+# ── AI (OpenAI-compatible client) ────────────────────────────────────────────
+openai>=1.30
+
+# ── Reddit ───────────────────────────────────────────────────────────────────
+praw>=7.7
+
+# ── Environment ──────────────────────────────────────────────────────────────
+python-dotenv>=1.0
+
+# ── Email ────────────────────────────────────────────────────────────────────
+sendgrid>=6.11            # optional — only needed if EMAIL_PROVIDER=sendgrid
+
+# ── PDF Export ───────────────────────────────────────────────────────────────
+markdown2>=2.4            # Markdown → HTML
+weasyprint>=61.0          # HTML → PDF (requires system libpango etc.)
+
+# ── Markdown utilities ───────────────────────────────────────────────────────
+markdown>=3.6
+
+# ── Optional: JS-heavy sites ─────────────────────────────────────────────────
+# playwright>=1.44        # pip install playwright && playwright install chromium
+
+# ── Dev / Notebook (not needed in production Docker image) ───────────────────
+# jupyter>=1.0
+# ipykernel>=6.0
+# pandas>=2.0
