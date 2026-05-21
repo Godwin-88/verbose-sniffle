@@ -156,9 +156,11 @@ def require_auth(f):
         key = (
             request.headers.get("X-API-Key")
             or request.args.get("api_key")
-            or request.json.get("api_key") if request.is_json else None
+            or (request.json.get("api_key") if request.is_json else None)
         )
+        log.debug(f"AUTH: X-API-Key header='{request.headers.get('X-API-Key')}' key_resolved='{key and key[:8]}...'")
         if not key:
+            log.warning(f"AUTH 401: no key. Headers: {dict(request.headers)}")
             return _error("Missing X-API-Key header", 401)
         user = _resolve_user(key)
         if not user:

@@ -193,8 +193,8 @@ class JobDB:
         cols   = ",".join(fields)
         try:
             with self._conn() as c:
-                c.execute(f"INSERT OR IGNORE INTO {tbl} ({cols}) VALUES ({ph})", vals)
-                return c.rowcount > 0
+                cur = c.execute(f"INSERT OR IGNORE INTO {tbl} ({cols}) VALUES ({ph})", vals)
+                return cur.rowcount > 0
         except Exception as e:
             import logging
             logging.getLogger(__name__).error(f"DB save error [{tbl}]: {e}")
@@ -207,14 +207,14 @@ class JobDB:
         vals = [self._serialize(v) for v in updates.values()]
         vals.append(record_id)
         with self._conn() as c:
-            c.execute(f"UPDATE {tbl} SET {sets} WHERE id=?", vals)
-            return c.rowcount > 0
+            cur = c.execute(f"UPDATE {tbl} SET {sets} WHERE id=?", vals)
+            return cur.rowcount > 0
 
     def delete(self, record_id: str, record_type: str = "job") -> bool:
         tbl = self._tbl(record_type)
         with self._conn() as c:
-            c.execute(f"DELETE FROM {tbl} WHERE id=?", (record_id,))
-            return c.rowcount > 0
+            cur = c.execute(f"DELETE FROM {tbl} WHERE id=?", (record_id,))
+            return cur.rowcount > 0
 
     # ── READ — jobs ──────────────────────────────────────────────────────────
     def exists(self, url: str, record_type: str = "job") -> bool:
@@ -318,8 +318,8 @@ class JobDB:
         ph     = ",".join(["?"] * len(fields))
         cols   = ",".join(fields)
         with self._conn() as c:
-            c.execute(f"INSERT OR IGNORE INTO tasks ({cols}) VALUES ({ph})", vals)
-            return c.rowcount > 0
+            cur = c.execute(f"INSERT OR IGNORE INTO tasks ({cols}) VALUES ({ph})", vals)
+            return cur.rowcount > 0
 
     def update_task(self, task_id: str, updates: dict) -> bool:
         updates["updated_at"] = self._now()
@@ -327,8 +327,8 @@ class JobDB:
         vals = [self._serialize(v) for v in updates.values()]
         vals.append(task_id)
         with self._conn() as c:
-            c.execute(f"UPDATE tasks SET {sets} WHERE id=?", vals)
-            return c.rowcount > 0
+            cur = c.execute(f"UPDATE tasks SET {sets} WHERE id=?", vals)
+            return cur.rowcount > 0
 
     def get_task(self, task_id: str) -> Optional[Dict]:
         with self._conn() as c:
@@ -516,8 +516,8 @@ class JobDB:
         tbl    = self._tbl(record_type)
         cutoff = (datetime.datetime.utcnow() - datetime.timedelta(days=days)).isoformat()
         with self._conn() as c:
-            c.execute(
+            cur = c.execute(
                 f"DELETE FROM {tbl} WHERE status=? AND scraped_at<?",
                 (status, cutoff)
             )
-            return c.rowcount
+            return cur.rowcount

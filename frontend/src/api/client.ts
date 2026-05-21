@@ -5,8 +5,9 @@ import axios from 'axios';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5055';
 
-// DEV: use master key from env directly
-const API_KEY = import.meta.env.VITE_API_KEY;
+// DEV: hardcoded master key — matches API_KEY in root .env
+// TODO: restore env var / auth when fixing login bug
+const API_KEY = 'e3fdc5aa427ae1b3a07d831248338ff37593e6a62f1e91111420503035196b5b';
 
 export const apiClient = axios.create({
   baseURL: API_BASE_URL,

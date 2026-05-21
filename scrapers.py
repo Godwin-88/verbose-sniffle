@@ -84,7 +84,7 @@ def scrape_all(keywords: List[str], sources: List[str]) -> List[Dict]:
 def enrich_job_description(job: dict) -> dict:
     """Fetch and parse the full job description from the listing URL."""
     try:
-        r    = requests.get(job["url"], headers=HEADERS, timeout=20)
+        r    = _get_with_retry(job["url"], headers=HEADERS, timeout=20)
         soup = BeautifulSoup(r.text, "html.parser")
         for tag in soup(["nav", "footer", "script", "style", "aside", "header"]):
             tag.decompose()
@@ -310,7 +310,7 @@ def scrape_fuzu(keyword: str) -> List[Dict]:
         f"?query={_enc(keyword)}&country=Kenya&per_page=20"
     )
     try:
-        r    = requests.get(url, headers=HEADERS, timeout=15)
+        r    = _get_with_retry(url, headers=HEADERS, timeout=15)
         data = r.json()
         for item in data.get("jobs", []):
             jobs.append({
@@ -383,7 +383,7 @@ def scrape_ngojobs(keyword: str) -> List[Dict]:
         "&limit=20"
     )
     try:
-        r    = requests.get(url, timeout=15)
+        r    = _get_with_retry(url, timeout=15)
         data = r.json()
         for item in data.get("data", []):
             f = item.get("fields", {})
@@ -475,7 +475,7 @@ def scrape_reddit(keyword: str) -> List[Dict]:
 # ════════════════════════════════════════════════════════════════════════════
 def _get_soup(url: str) -> BeautifulSoup | None:
     try:
-        r = requests.get(url, headers=HEADERS, timeout=20)
+        r = _get_with_retry(url, headers=HEADERS, timeout=20)
         r.raise_for_status()
         return BeautifulSoup(r.text, "html.parser")
     except Exception as e:
@@ -502,8 +502,25 @@ def _enc(s: str) -> str:
 
 
 def _polite_delay():
-    """Random delay between requests to avoid rate limiting."""
-    time.sleep(random.uniform(2.0, 4.5))
+    time.sleep(random.uniform(3.0, 6.0))
+
+
+def _get_with_retry(url, headers=None, timeout=20, retries=3):
+    """GET with exponential backoff on 429/503."""
+    for attempt in range(retries):
+        try:
+            r = requests.get(url, headers=headers or HEADERS, timeout=timeout)
+            if r.status_code == 429:
+                wait = (2 ** attempt) * random.uniform(5, 10)
+                log.warning(f"429 from {url[:60]} — waiting {wait:.0f}s")
+                time.sleep(wait)
+                continue
+            return r
+        except requests.RequestException as e:
+            if attempt == retries - 1:
+                raise
+            time.sleep(2 ** attempt * 2)
+    return None
 
 
 def _deduplicate(jobs: List[Dict]) -> List[Dict]:

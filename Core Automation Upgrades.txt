@@ -1,0 +1,151 @@
+---
+  Core Automation Upgrades (Free Tier Value)
+
+  1. Smarter Scraping Pipeline
+  - Multi-source deduplication — n8n compares new listings against existing DB, only processes truly new ones. Saves AI token costs.
+  - Deadline-aware urgency queue — n8n sorts and prioritizes listings closing within 7 days, processes those first
+  - Failed scrape retry logic — exponential backoff on failed sources, alert user if a source is consistently down
+
+  2. Application Tracking Loop
+  - n8n polls employer career portals after dispatch and updates status (applied → viewed → shortlisted → rejected) using HTTP requests
+  - Currently the pipeline stops at "dispatched" — tracking closes the loop
+
+  3. Smart Reminder System
+  - n8n schedule: "You have 3 approved jobs sitting unsubmitted for 48hrs" → email nudge
+  - Deadline countdown: "Chevening closes in 3 days — you haven't submitted" 
+  - Weekly digest email: applications sent, responses received, upcoming deadlines
+
+  ---
+  Monetizable Feature Tiers
+
+  Tier 1 — Pro Plan (~$15/mo)
+
+  AI Interview Prep (n8n + AI)
+  - After approval, n8n triggers a separate AI workflow: generates 10 likely interview questions based on the JD + user profile, plus model answers
+  - Delivered to dashboard as a new "Interview Prep" tab on each job
+  - n8n webhook receives "approved" event → calls AI → stores results
+
+  Portfolio Match Scoring Improvement
+  - n8n weekly job: re-scores all pending listings against an updated profile
+  - User updates their CV → n8n detects profile change via webhook → triggers re-score across all open listings
+
+  LinkedIn Job Sync (n8n HTTP node)
+  - n8n polls LinkedIn Jobs API or scrapes authenticated session for personalized job recommendations
+  - Unique because LinkedIn requires auth — gated behind Pro
+
+  ---
+  Tier 2 — Growth Plan (~$35/mo)
+
+  Auto-Apply Pipeline (the full automation)
+  - Currently: scrape → AI docs → email user → user approves → user manually applies
+  - With n8n: after user approves, n8n uses Playwright/browser automation to actually submit the application to BrighterMonday, Fuzu, etc.
+  - This is the core monetizable feature — "set it and forget it"
+  - Implementation: n8n triggers POST /jobs/{id}/auto-apply → backend runs Playwright → status updates
+
+  Scholarship Portal Auto-Fill
+  - n8n + Playwright fills Chevening, CommonApp, DAAD portals
+  - Uses profile data + generated docs
+  - Massive time save — a Chevening application takes 8+ hours manually
+
+  Email Response Handler
+  - n8n monitors user's Gmail/Outlook via OAuth
+  - Detects employer replies (interview invites, rejections, requests for more info)
+  - Auto-categorizes and surfaces them in dashboard
+  - Sends user a notification with suggested reply drafted by AI
+
+  ---
+  Tier 3 — Agency/Team Plan (~$99/mo)
+  
+  Multi-Profile Management
+  - Recruitment agencies managing multiple candidates
+  - n8n fan-out: one scrape run, matched and personalized per-candidate
+  - Each candidate gets their own approval queue
+
+  Bulk University Application
+  - User selects 20 scholarship programs → n8n generates all 20 motivation letters in parallel (n8n splits items, calls AI for each in parallel branches)
+  - Progress tracked in real-time in Tasks page
+
+  White-label Outreach
+  - n8n sends cold outreach emails to companies not actively hiring ("speculative applications")
+  - AI drafts the email based on company research (n8n → Clearbit/Hunter.io for company data → AI → SMTP)
+  - 5 emails/week on Pro, unlimited on Agency
+  
+  ---
+  Revenue-Generating Data Features
+  
+  Salary Intelligence (n8n aggregation)
+  - n8n scrapes salary data from job listings across all sources
+  - Aggregates into a salary insights dashboard: "Data Analysts in Nairobi earn KSh 80k–150k"
+  - Sell API access to this dataset to HR firms, recruiters
+
+  Job Market Trends
+  - n8n runs weekly: counts listings per sector, region, seniority level
+  - Dashboard "Market Pulse" section showing demand trends
+  - "Software jobs up 23% this month in Nairobi"
+  - Premium: export data, custom date ranges, sector deep-dives
+
+  Application Success Analytics
+  - n8n tracks: applications sent → responses → interviews → offers
+  - Builds success rate per source, sector, company size
+  - Shows user: "Your BrighterMonday applications get 3x more responses than LinkedIn"
+
+  ---
+  Platform Operations (Internal — Reduces Costs)
+
+  Token Cost Optimization
+  - n8n batches AI generation: instead of one API call per job, batch 5 at once
+  - Cuts OpenAI/Groq spend by ~60%
+
+  User Onboarding Drip
+  - n8n Typeform/email sequence for new signups: Day 1 (setup guide) → Day 3 (first scrape prompt) → Day 7 (check-in if no activity)
+  - Converts free users to Pro
+
+  Churn Prevention
+  - n8n monitors user activity: if no login for 14 days → automated "here's what you missed" re-engagement email with actual job count
+  
+  Stripe Billing Webhooks
+  - n8n receives Stripe customer.subscription.updated → updates user plan in DB → unlocks/locks features
+  - No code change needed when adding new plans
+
+  ---
+  Highest-Impact Quick Wins to Build First
+  
+  ┌──────────┬───────────────────────────────────────────┬────────┬─────────────────────────┐
+  │ Priority │                  Feature                  │ Effort │     Revenue Impact      │
+  ├──────────┼───────────────────────────────────────────┼────────┼─────────────────────────┤
+  │ 1        │ Email response handler (Gmail OAuth)      │ Medium │ High — closes the loop  │
+  ├──────────┼───────────────────────────────────────────┼────────┼─────────────────────────┤
+  │ 2        │ Interview prep AI (post-approval trigger) │ Low    │ Core Pro upsell         │
+  ├──────────┼───────────────────────────────────────────┼────────┼─────────────────────────┤
+  │ 3        │ Deadline reminder emails                  │ Low    │ Retention               │
+  ├──────────┼───────────────────────────────────────────┼────────┼─────────────────────────┤
+  │ 4        │ Auto-apply via Playwright                 │ High   │ Tier 2 anchor feature   │
+  ├──────────┼───────────────────────────────────────────┼────────┼─────────────────────────┤
+  │ 5        │ Salary intelligence dashboard             │ Medium │ Data product / B2B      │
+  ├──────────┼───────────────────────────────────────────┼────────┼─────────────────────────┤
+  │ 6        │ Stripe billing webhook → plan gating      │ Low    │ Monetization foundation │
+  └──────────┴───────────────────────────────────────────┴────────┴─────────────────────────┘
+
+  ---
+  The single most powerful thing n8n enables here that competitors don't have: the closed-loop — from discovery all the way through to tracking employer responses, re-engaging users,
+  and learning what actually works. Most job tools stop at "here's a listing." You can own the entire application lifecycle.
+  
+  Want me to implement any of these? I'd start with the Stripe billing webhook + plan gating since that's the monetization foundation everything else builds on, or the email response
+  handler since it immediately increases the platform's value.
+
+ The api service has depends_on: postgres which is fine, but you just want to skip it. Run:
+
+  docker compose up -d n8n postgres
+
+  That starts only those two services. The api dependency check in n8n's config points to the internal http://api:5055 — since you're running the API locally, update the n8n env var so
+   workflows can reach it. Add this to your .env:
+
+  N8N_WEBHOOK_URL=http://localhost:5678
+
+  And in any n8n workflows, use http://host.docker.internal:5055 as the API base URL instead of http://api:5055 — that's how Docker containers reach your locally-running Flask server
+  on Linux (or set JH_API_BASE_URL=http://host.docker.internal:5055 in the compose env).
+
+  To verify both are up:
+  docker compose ps
+
+n8n licence - e15dc4fb-1033-4050-834a-65a5a4bf2b13
