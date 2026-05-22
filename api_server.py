@@ -67,7 +67,7 @@ from scrapers import scrape_all, enrich_job_description
 from scholarship_scrapers import scrape_scholarships
 from ai_engine import generate_application_package, generate_scholarship_package, MODEL
 from email_dispatch import notify_review_ready, notify_dispatched, notify_task_complete
-from pdf_export import export_to_pdf, export_extension
+from pdf_export import export_to_pdf, export_cover_letter, export_resume, export_extension
 
 load_dotenv()
 logging.basicConfig(
@@ -670,6 +670,7 @@ def mark_job_dispatched(job_id):
 @app.route("/jobs/<job_id>/export", methods=["GET"])
 @require_auth
 def export_job(job_id):
+    """Full combined application package (legacy)."""
     job = db.get(job_id, "job")
     if not job:
         return _error("Not found", 404)
@@ -677,16 +678,58 @@ def export_job(job_id):
     title = f"{job.get('title','Job')} @ {job.get('company','')}"
     data, mime = export_to_pdf(md, title)
     ext = export_extension()
+    safe = (job.get('company','') + "_" + job.get('title','')).replace("/","_").replace(" ","_")[:60]
     return Response(
-        data,
-        mimetype=mime,
-        headers={"Content-Disposition":
-                 f'attachment; filename="application_{job_id[:8]}.{ext}"'},
+        data, mimetype=mime,
+        headers={"Content-Disposition": f'attachment; filename="{safe}_package.{ext}"'},
+    )
+
+
+@app.route("/jobs/<job_id>/export/cover-letter", methods=["GET"])
+@require_auth
+def export_job_cover_letter(job_id):
+    """Export only the cover letter as a clean professional PDF."""
+    job = db.get(job_id, "job")
+    if not job:
+        return _error("Not found", 404)
+    md = job.get("cover_letter") or "Cover letter not generated yet."
+    title = f"Cover Letter — {job.get('title','')} @ {job.get('company','')}"
+    data, mime = export_cover_letter(md, title)
+    ext = export_extension()
+    safe = (job.get('company','') + "_" + job.get('title','')).replace("/","_").replace(" ","_")[:60]
+    return Response(
+        data, mimetype=mime,
+        headers={"Content-Disposition": f'attachment; filename="{safe}_cover_letter.{ext}"'},
+    )
+
+
+@app.route("/jobs/<job_id>/export/resume", methods=["GET"])
+@require_auth
+def export_job_resume(job_id):
+    """Export the tailored resume as a structured CV PDF."""
+    job = db.get(job_id, "job")
+    if not job:
+        return _error("Not found", 404)
+    resume_data = job.get("tailored_resume") or {}
+    if isinstance(resume_data, str):
+        import json as _json
+        try:
+            resume_data = _json.loads(resume_data)
+        except Exception:
+            resume_data = {}
+    md = resume_data.get("markdown") or "Tailored resume not generated yet."
+    title = f"Tailored CV — {job.get('title','')} @ {job.get('company','')}"
+    data, mime = export_resume(md, title)
+    ext = export_extension()
+    safe = (job.get('company','') + "_" + job.get('title','')).replace("/","_").replace(" ","_")[:60]
+    return Response(
+        data, mimetype=mime,
+        headers={"Content-Disposition": f'attachment; filename="{safe}_resume.{ext}"'},
     )
 
 
 # ════════════════════════════════════════════════════════════════════════════
-# ── SCHOLARSHIP ENDPOINTS ─────────────────────────────────────────────────
+# ── SCHOLARSHIP ENDPOINTS ─────────────────────────────────────════════════
 # ════════════════════════════════════════════════════════════════════════════
 def _do_scrape_scholarships(keywords, sources, region_filter, funding_filter, user_id):
     scholarships = scrape_scholarships(

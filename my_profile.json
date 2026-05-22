@@ -1,107 +1,185 @@
 {
-  "name": "Jane Wanjiku Kamau",
-  "email": "jane.kamau@gmail.com",
-  "phone": "+254 712 345 678",
+  "name": "Godwin Edgar Opuka",
+  "email": "millenialwitness@gmail.com",
+  "phone": "+254 715 849 117",
   "location": "Nairobi, Kenya",
-  "linkedin": "linkedin.com/in/janekamau",
+  "linkedin": "linkedin.com/in/godwin-edgar-opuka",
 
   "target_roles": [
-    "Data Analyst",
-    "Business Intelligence Analyst",
-    "Research Analyst",
-    "Programme Officer"
+    "Full-Stack Developer",
+    "Solutions Architect",
+    "AI/ML Engineer",
+    "Data Engineer",
+    "Software Engineer",
+    "Backend Developer",
+    "Financial Engineer",
+    "Business Intelligence Engineer"
   ],
 
   "target_sectors": [
-    "Development Finance",
+    "Technology",
+    "Financial Services",
+    "Fintech",
     "NGO / INGO",
-    "Government / Public Sector",
-    "Technology"
+    "Consulting",
+    "Government / Public Sector"
   ],
 
-  "min_salary_ksh": 120000,
-  "work_preferences": ["hybrid", "remote"],
+  "min_salary_ksh": 150000,
+  "work_preferences": ["remote", "hybrid", "full-time"],
   "locations_ok": ["Nairobi", "Remote"],
 
-  "summary": "Results-driven Data Analyst with 5+ years translating complex datasets into strategic decisions across public health, finance, and agriculture sectors in East Africa.",
+  "summary": "Full-Stack Solutions Architect, AI/ML Engineer, and Financial Engineer with proven experience designing and delivering end-to-end intelligent systems — from backend data pipelines and API layers through to React-based frontends and graph-powered analytics. Currently serving as Solutions Architect at DigitalQatalyst, owning the full development lifecycle of enterprise-scale digital platforms built on Neo4j, GraphQL/REST APIs, and MACH architecture principles. MSc Financial Engineering candidate at WorldQuant University with a strong quantitative foundation spanning stochastic calculus, derivative pricing, and ML in finance.",
 
   "education": [
     {
-      "degree": "MSc Statistics",
-      "institution": "University of Nairobi",
-      "year": 2020,
-      "grade": "Distinction"
+      "degree": "MSc Financial Engineering",
+      "institution": "WorldQuant University",
+      "year": 2026,
+      "grade": "In Progress (Expected Apr 2026)",
+      "notes": "Coursework: Financial Data, Financial Markets, Derivative Pricing, Financial Econometrics, Stochastic Modeling, Machine Learning in Finance, Deep Learning for Finance. Currently enrolled: Portfolio Management. Remaining: Risk Management, Capstone."
     },
     {
-      "degree": "BSc Mathematics & Computer Science",
-      "institution": "Strathmore University",
-      "year": 2017,
-      "grade": "First Class Honours"
+      "degree": "BSc Financial Engineering",
+      "institution": "Jomo Kenyatta University of Agriculture and Technology (JKUAT)",
+      "year": 2021,
+      "grade": "Completed Dec 2021",
+      "notes": "Mathematically intensive program covering Stochastic Calculus, Derivative Pricing, Game Theory, Statistical Inference, Linear Algebra, Numerical Methods, and Financial Theory."
     }
   ],
 
   "experience": [
     {
-      "title": "Senior Data Analyst",
-      "company": "Kenya Revenue Authority",
-      "dates": "2021 – Present",
+      "title": "Solutions Architect & BI Lead",
+      "company": "DigitalQatalyst (Contract)",
+      "dates": "Jun 2025 – Present",
       "bullets": [
-        "Built automated ETL pipelines in Python reducing reporting time from 3 days to 4 hours",
-        "Developed a taxpayer compliance prediction model (XGBoost) with 89% accuracy, flagging KSh 2.1B in under-reported income",
-        "Led a team of 4 analysts delivering monthly dashboards to 12 executive stakeholders",
-        "Migrated legacy Access databases to PostgreSQL, improving query performance by 300%"
+        "Architecting the Twin Graph Manager — a graph-powered digital business platform modeling enterprise digital twins using Neo4j and graph data science",
+        "Designing and building full-stack platform architecture: Neo4j graph backend, GraphQL/REST API layer, Redux state management, and React component-driven frontend",
+        "Implementing microservices patterns and MACH-aligned architecture for platform scalability, composability, and extensibility",
+        "Architecting a full-stack Digital Intelligence & Analytics solution delivering descriptive, diagnostic, predictive, prescriptive, and deep intelligence capabilities",
+        "Building API-first data services (REST & GraphQL) with enterprise governance standards",
+        "Built graph-based intelligence solutions using Neo4j for relationship-centric analytics and decision intelligence",
+        "Oversaw enterprise architecture modeling using Ardoq and Abacus to align business capabilities with digital platforms",
+        "Directed deployment of AI agents for business process automation across multiple domains",
+        "Orchestrated migration of dashboards from Power BI to React-based solutions"
+      ]
+    },
+    {
+      "title": "Full-Stack Data Developer | AI/ML Engineer",
+      "company": "DigitalQatalyst (Contract)",
+      "dates": "Jun 2025 – Sep 2025",
+      "bullets": [
+        "Engineered end-to-end data pipelines using Python, R, Spark, and Microsoft Fabric",
+        "Developed and deployed ML-powered services with REST and GraphQL API endpoints including React frontend integration layers",
+        "Designed feature engineering pipelines for predictive analytics and AI-driven products",
+        "Built and maintained CI/CD pipelines for data, ML, and application workloads using Azure DevOps"
       ]
     },
     {
       "title": "Data Analyst",
-      "company": "Kenya Red Cross Society",
-      "dates": "2019 – 2021",
+      "company": "Freelance",
+      "dates": "Apr 2021 – May 2025",
       "bullets": [
-        "Analysed beneficiary data across 8 counties to optimise food distribution for 45,000+ households",
-        "Built Power BI dashboards used in quarterly donor reporting (USAID, ECHO)",
-        "Cleaned and geocoded 120,000-row household survey dataset for drought response programme"
+        "Delivered quantitative and qualitative analytical solutions across finance and business domains",
+        "Conducted financial statement analysis and hypothesis testing using robust statistical methods",
+        "Generated actionable insights through advanced data modeling and research methodologies"
       ]
+    },
+    {
+      "title": "Claims Analyst (Intern)",
+      "company": "Madison Group Kenya",
+      "dates": "Jul 2022 – Nov 2022",
+      "bullets": [
+        "Supported claims processing and analysis in insurance operations"
+      ]
+    },
+    {
+      "title": "Asset Management Analyst (Intern)",
+      "company": "Nairobi County Government",
+      "dates": "Jan 2022 – Mar 2022",
+      "bullets": [
+        "Supported asset tracking and management reporting for county government assets"
+      ]
+    },
+    {
+      "title": "Business Development Associate (Intern)",
+      "company": "Favitech Solutions Ltd",
+      "dates": "Oct 2020 – Mar 2021",
+      "bullets": [
+        "Supported business development initiatives and client engagement activities"
+      ]
+    }
+  ],
+
+  "projects": [
+    {
+      "name": "Market Signal Graph",
+      "dates": "Jan 2025 – Present",
+      "description": "Next-generation financial research tool combining vector search (pgvector on PostgreSQL) with graph data science (Neo4j) to uncover hidden market signals and surface non-obvious relationships in financial data."
+    },
+    {
+      "name": "High-Performance Derivatives Pricing Engine",
+      "dates": "Jan 2025 – Present",
+      "description": "Implemented mathematical pricing models in Rust with a FastAPI backend to compute derivative prices at high performance, bridging quantitative finance theory with production-grade engineering."
+    },
+    {
+      "name": "Job Hunter KE",
+      "dates": "2025 – Present",
+      "description": "Automated job application SaaS for the Kenyan market — scrapes listings, generates tailored CVs and cover letters using AI, and routes them through an n8n-powered review and dispatch workflow."
     }
   ],
 
   "skills": {
     "technical": [
-      "Python (pandas, scikit-learn, matplotlib)",
-      "SQL (PostgreSQL, MySQL)",
-      "Power BI", "Tableau",
-      "R", "Excel (advanced)",
-      "ETL / data pipelines",
-      "Machine learning",
-      "GIS / QGIS",
-      "Git"
+      "Python (pandas, scikit-learn, FastAPI, Flask)",
+      "R, Spark, SQL",
+      "React.js, Next.js, Node.js",
+      "Neo4j, Graph Modeling, Graph Algorithms",
+      "REST APIs, GraphQL APIs, Microservices",
+      "Machine Learning Pipelines, Feature Engineering, Model Deployment",
+      "AI Agent Development",
+      "Microsoft Fabric, Power BI, Azure Data Factory",
+      "MACH Architecture, Ardoq, Abacus",
+      "Azure DevOps, CI/CD Pipelines, Agile/Scrum",
+      "Rust (quantitative/systems programming)",
+      "Docker, Git",
+      "Stochastic Calculus, Derivative Pricing, Monte Carlo Simulation",
+      "GARCH, LSTM, Deep Learning for Finance"
     ],
     "soft": [
+      "Solutions architecture",
       "Stakeholder communication",
-      "Report writing",
-      "Team leadership",
-      "Project management",
-      "Presentation skills"
+      "Technical leadership",
+      "End-to-end project ownership",
+      "Quantitative research communication"
     ],
     "languages": ["English (fluent)", "Swahili (native)"]
   },
 
-  "certifications": [
-    "Google Data Analytics Professional Certificate (2022)",
-    "Microsoft PL-300 Power BI Data Analyst (2023)",
-    "UNHCR Data for Development Certificate (2021)"
-  ],
+  "certifications": [],
 
   "notable_achievements": [
-    "KRA Director General Award for Innovation (2023)",
-    "Published in African Journal of Statistics: 'Mobile Money Data as a Proxy for Household Income' (2022)"
+    "Promoted from Full-Stack Data Developer to Solutions Architect & BI Lead at DigitalQatalyst within 3 months (Sep 2025)",
+    "Architected Enterprise Architecture IP solution automating digital transformation through graph-powered analysis of digital capabilities",
+    "Led full dashboard modernization — migrated Power BI solutions to React-based platforms for enterprise integration"
   ],
 
   "referees": [
     {
-      "name": "Dr. Alice Mwangi",
-      "title": "Head of Research, Kenya Revenue Authority",
-      "email": "a.mwangi@kra.go.ke",
-      "phone": "+254 722 000 001"
+      "name": "Ibrahim Abdi",
+      "title": "Systems Engineer – FS Planning, Safaricom PLC",
+      "phone": "+254 719 310 268"
+    },
+    {
+      "name": "Cannel Maina",
+      "title": "Data & Technology Lead, Centiwise",
+      "phone": "+254 706 724 017"
+    },
+    {
+      "name": "Jibril K. Said",
+      "title": "Finance Officer, Ministry of Health, Kenya",
+      "phone": "+254 706 757 842"
     }
   ]
 }

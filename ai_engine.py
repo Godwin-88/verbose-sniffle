@@ -95,27 +95,31 @@ def polish_markdown(md: str) -> str:
 def generate_cover_letter(job: dict, profile: dict) -> str:
     system = textwrap.dedent("""\
         You are a seasoned Kenyan career coach and professional writer.
-        Output clean Markdown only. Flowing paragraphs — no bullets inside the letter.
-        Avoid clichés. Be specific, confident, human.
+        CRITICAL RULES:
+        - Output clean Markdown ONLY — no code fences, no HTML comments, no raw JSON
+        - ABSOLUTELY NO bullet points or numbered lists anywhere in the letter body
+        - Write in flowing paragraphs only
+        - Do NOT invent statistics or percentages you cannot verify from the profile
+        - Be specific, confident, and human — avoid clichés like "I am excited to apply"
+        - Keep to 4 tight paragraphs maximum
     """)
     user = textwrap.dedent(f"""\
-        Write a tailored cover letter for this job.
+        Write a tailored cover letter for this job application.
 
-        ## PROFILE
+        ## CANDIDATE PROFILE
         {json.dumps(profile, indent=2)}
 
-        ## JOB
+        ## JOB DETAILS
         Title: {job.get('title')}
         Company: {job.get('company')}
         Location: {job.get('location','Kenya')}
-        Deadline: {job.get('deadline','ASAP')}
         Description:
         {(job.get('full_description') or job.get('snippet',''))[:2500]}
 
-        ## FORMAT (output exactly this Markdown structure)
+        ## EXACT OUTPUT FORMAT — reproduce this structure, fill in the bracketed sections:
+
         # {profile.get('name','')}
-        {profile.get('email','')} · {profile.get('phone','')} · {profile.get('location','Nairobi, Kenya')}
-        {datetime.date.today().strftime('%d %B %Y')}
+        {profile.get('email','')} · {profile.get('phone','')} · {profile.get('location','Nairobi, Kenya')} · {datetime.date.today().strftime('%d %B %Y')}
 
         ---
 
@@ -123,72 +127,117 @@ def generate_cover_letter(job: dict, profile: dict) -> str:
 
         Dear Hiring Manager,
 
-        [Hook — name the role, show you know the org]
+        [Paragraph 1 — strong opening. Name the exact role. Show you know what this organisation does and why it matters. Do NOT start with "I am excited/pleased/writing to".]
 
-        [2–3 measurable achievements mapped to requirements]
+        [Paragraph 2 — your most relevant experience mapped directly to the role requirements. Reference real achievements from the profile above. Write in prose — no bullets.]
 
-        [Why this company/sector specifically]
+        [Paragraph 3 — why this organisation specifically. What about their mission, sector, or work draws you? Connect to your own values or trajectory.]
 
-        [Confident closing with call to action]
+        [Paragraph 4 — confident close. Express availability. Call to action. One sentence.]
 
         Yours sincerely,
 
         **{profile.get('name','')}**
         {(profile.get('experience') or [{}])[0].get('title','')}
 
-        Return ONLY the Markdown. No outer code fences.
+        Output ONLY the Markdown above. No code fences. No HTML comments. No bullets anywhere.
     """)
-    return polish_markdown(_chat(system, user, max_tokens=1200))
+    return polish_markdown(_chat(system, user, max_tokens=1400))
 
 
 def tailor_resume(job: dict, profile: dict) -> dict:
-    system = textwrap.dedent("""\
-        You are an ATS optimisation expert and Kenyan CV strategist.
-        Return ONLY a single valid JSON object — no prose, no fences.
+    # Step 1: get structured data as JSON (small, focused prompt)
+    system_json = textwrap.dedent("""\
+        You are an ATS optimisation expert. Return ONLY a valid JSON object — no prose, no fences.
     """)
-    user = textwrap.dedent(f"""\
-        Return ONE JSON object:
+    user_json = textwrap.dedent(f"""\
+        Analyse this candidate's fit for the job and return ONE JSON object with these exact keys:
         {{
-          "match_score": <0-100>,
-          "summary": "<2-3 sentence tailored summary>",
-          "highlighted_skills": ["skill1",...],
-          "keywords": ["ats_phrase1",...],
-          "bullet_rewrites": {{"<original>": "<rewritten with verb + numbers>"}},
-          "markdown": "<full Markdown resume section>"
+          "match_score": <integer 0-100>,
+          "summary": "<2 sentence tailored professional summary>",
+          "highlighted_skills": ["skill1", "skill2", "skill3", "skill4", "skill5"],
+          "keywords": ["ats_keyword1", "ats_keyword2", "ats_keyword3", "ats_keyword4", "ats_keyword5"],
+          "bullet_rewrites": {{
+            "<original bullet from profile>": "<rewritten with strong verb + quantified impact>"
+          }}
         }}
 
-        markdown template:
-        ## Tailored Resume — {job.get('title')} @ {job.get('company')}
-        ### Summary
-        [summary]
-        ### Key Skills
-        [skills inline]
-        ### Experience Highlights
-        - [5 rewritten bullets]
-        ### ATS Keywords
-        [keywords]
-        *Match: X%*
+        CANDIDATE (summary only):
+        Name: {profile.get('name')}
+        Current role: {(profile.get('experience') or [{}])[0].get('title','')} at {(profile.get('experience') or [{}])[0].get('company','')}
+        Skills: {', '.join((profile.get('skills') or {{}}).get('technical', [])[:10])}
+        Education: {', '.join([e.get('degree','') + ' ' + e.get('institution','') for e in (profile.get('education') or [])])}
 
-        ## PROFILE
+        JOB: {job.get('title')} @ {job.get('company')}
+        {(job.get('full_description') or job.get('snippet',''))[:1500]}
+
+        Return ONLY the JSON. No fences. No extra text.
+    """)
+    raw = _strip_fences(_chat(system_json, user_json, max_tokens=800, temperature=0.2))
+    try:
+        data = json.loads(raw)
+    except Exception:
+        m = re.search(r"\{[\s\S]+?\}", raw)
+        try:
+            data = json.loads(m.group()) if m else {}
+        except Exception:
+            data = {}
+
+    # Step 2: generate the resume markdown separately
+    system_md = "You are a professional CV writer. Output clean Markdown only. No code fences."
+    user_md = textwrap.dedent(f"""\
+        Write a tailored one-page resume for this candidate applying to this job.
+
+        ## CANDIDATE PROFILE
         {json.dumps(profile, indent=2)}
 
         ## JOB
         {job.get('title')} @ {job.get('company')}
-        {(job.get('full_description') or job.get('snippet',''))[:2500]}
+        {(job.get('full_description') or job.get('snippet',''))[:1500]}
 
-        Rules: max 5 rewrites, past-tense verbs, quantify, return ONLY JSON.
+        ## ATS KEYWORDS TO WEAVE IN
+        {', '.join(data.get('keywords', []))}
+
+        ## OUTPUT FORMAT — use exactly this structure:
+
+        # {profile.get('name','')}
+        {profile.get('email','')} · {profile.get('phone','')} · {profile.get('location','Nairobi, Kenya')} · {profile.get('linkedin','')}
+
+        ## Professional Summary
+        [2-3 sentences tailored to this role]
+
+        ## Key Skills
+        [comma-separated relevant skills]
+
+        ## Professional Experience
+
+        ### {(profile.get('experience') or [{}])[0].get('title','')} — {(profile.get('experience') or [{}])[0].get('company','')}
+        *{(profile.get('experience') or [{}])[0].get('dates','')}*
+        - [rewritten bullet 1 — strong verb + quantified impact]
+        - [rewritten bullet 2]
+        - [rewritten bullet 3]
+        - [rewritten bullet 4]
+
+        [continue for other relevant roles]
+
+        ## Education
+        [degrees, institutions, years]
+
+        ## Certifications & Projects
+        [if relevant to this role]
+
+        *Match score: {data.get('match_score', '?')}% — {job.get('title')} @ {job.get('company')}*
+
+        Output ONLY the Markdown. No code fences. No HTML comments.
     """)
-    raw = _strip_fences(_chat(system, user, max_tokens=2000, temperature=0.3))
-    try:
-        data = json.loads(raw)
-    except Exception:
-        m = re.search(r"\{[\s\S]+\}", raw)
-        try:
-            data = json.loads(m.group()) if m else _fallback_resume(raw)
-        except Exception:
-            data = _fallback_resume(raw)
-    if "markdown" in data:
-        data["markdown"] = polish_markdown(str(data["markdown"]))
+    resume_md = polish_markdown(_chat(system_md, user_md, max_tokens=2000, temperature=0.3))
+
+    data["markdown"] = resume_md
+    data.setdefault("match_score", 0)
+    data.setdefault("summary", "")
+    data.setdefault("highlighted_skills", [])
+    data.setdefault("keywords", [])
+    data.setdefault("bullet_rewrites", {})
     return data
 
 

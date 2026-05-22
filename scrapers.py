@@ -422,12 +422,16 @@ def scrape_linkedin_public(keyword: str) -> List[Dict]:
         link_el  = card.select_one("a.base-card__full-link")
         if not title_el or not link_el:
             continue
+        posted_raw = _text(card, "time").lower()
+        # Skip listings posted more than 30 days ago
+        if any(x in posted_raw for x in ["month", "months", "year", "years"]):
+            continue
         jobs.append({
             "title":    title_el.get_text(strip=True),
             "url":      link_el["href"].split("?")[0],
             "company":  _text(card, "h4.base-search-card__subtitle"),
             "location": _text(card, "span.job-search-card__location"),
-            "deadline": _text(card, "time"),
+            "deadline": f"Posted {posted_raw}" if posted_raw else "",
             "snippet":  "",
             "sector":   "private",
         })
