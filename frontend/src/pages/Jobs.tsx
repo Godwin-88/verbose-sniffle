@@ -39,7 +39,7 @@ const STATUS_TABS = [
 
 const PER_PAGE = 50;
 
-type SortKey = 'title' | 'company' | 'scraped_at' | 'source' | 'match_score';
+type SortKey = 'title' | 'company' | 'deadline' | 'source' | 'match_score';
 type SortDir = 'asc' | 'desc';
 
 function useDebounce<T>(value: T, delay: number): T {
@@ -70,7 +70,7 @@ export default function Jobs() {
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
   const [sourceFilter, setSourceFilter] = useState('all');
-  const [sortKey, setSortKey] = useState<SortKey>('scraped_at');
+  const [sortKey, setSortKey] = useState<SortKey>('deadline');
   const [sortDir, setSortDir] = useState<SortDir>('desc');
 
   const debouncedSearch = useDebounce(search, 300);
@@ -91,7 +91,7 @@ export default function Jobs() {
       setSortDir(d => d === 'asc' ? 'desc' : 'asc');
     } else {
       setSortKey(key);
-      setSortDir(key === 'scraped_at' ? 'desc' : 'asc');
+      setSortDir('asc');
     }
     setPage(1);
   };
@@ -124,9 +124,9 @@ export default function Jobs() {
       if (sortKey === 'match_score') {
         av = a.match_score ?? -1;
         bv = b.match_score ?? -1;
-      } else if (sortKey === 'scraped_at') {
-        av = a.scraped_at ?? '';
-        bv = b.scraped_at ?? '';
+      } else if (sortKey === 'deadline') {
+        av = a.deadline ?? '';
+        bv = b.deadline ?? '';
       } else {
         av = ((a as unknown as Record<string, unknown>)[sortKey] as string) ?? '';
         bv = ((b as unknown as Record<string, unknown>)[sortKey] as string) ?? '';
@@ -268,8 +268,8 @@ export default function Jobs() {
               <TableHead className={thClass} onClick={() => handleSort('company')}>
                 Company <SortIcon col="company" sortKey={sortKey} dir={sortDir} />
               </TableHead>
-              <TableHead className={thClass} onClick={() => handleSort('scraped_at')}>
-                Date Posted <SortIcon col="scraped_at" sortKey={sortKey} dir={sortDir} />
+              <TableHead className={thClass} onClick={() => handleSort('deadline')}>
+                Date Posted <SortIcon col="deadline" sortKey={sortKey} dir={sortDir} />
               </TableHead>
               <TableHead className={thClass} onClick={() => handleSort('source')}>
                 Source <SortIcon col="source" sortKey={sortKey} dir={sortDir} />
@@ -308,9 +308,9 @@ export default function Jobs() {
                   </TableCell>
                   <TableCell className="text-muted-foreground">{job.company}</TableCell>
                   <TableCell className="text-muted-foreground text-sm whitespace-nowrap">
-                    {job.scraped_at
+                    {job.deadline || (job.scraped_at
                       ? new Date(job.scraped_at).toLocaleDateString('en-KE', { day: 'numeric', month: 'short', year: 'numeric' })
-                      : job.deadline || '—'}
+                      : '—')}
                   </TableCell>
                   <TableCell>
                     <Badge variant="outline" className="text-xs font-normal">
