@@ -1,28 +1,22 @@
-# Godwin Edgar Opuka
+ Godwin Edgar Opuka
 
-millenialwitness@gmail.com · 
-+254 715 849 117 · Nairobi, Kenya
-22 May 2026
+  millenialwitness@gmail.com · +254 715 849 117 · Nairobi, Kenya · 22 May 2026
 
----
+  ---
+  Tech Pipeline
 
-**World Vision**
+  Dear Hiring Manager,
+ 
+  The distinction Tech Pipeline draws — between tools built for utility and reliability versus tools built for aesthetics — is one    I hold myself. Every frontend I have shipped has been oriented around whether the user can complete their task without   friction, not whether it looks impressive in a portfolio screenshot.
 
-Dear Hiring Manager,
+  At Zamadi Group I build and maintain exactly the kind of interfaces this role describes: internal dashboards with real-time   transaction monitoring, form-driven workflows with validation and backend routing, and role-gated portals where what you see   depends entirely on what you are permitted to do. The React 19 admin workspace I built for Afripay handles financial data flows   where a misrouted input has real consequences — that accountability sharpens attention to validation logic, error states, and   data consistency across the stack in ways that marketing site work simply does not. I connect frontends to APIs, write the   documentation that keeps those connections maintainable six months later, and use Git as a matter of discipline rather than
+  suggestion.
 
-As a seasoned Solutions Architect & BI Lead with a passion for making a meaningful impact, I'm excited to apply for the Project Officer-Health role at World Vision. With your organization's 75 years of experience in helping vulnerable children overcome poverty and experience fullness of life, I'm drawn to the prospect of joining a team that shares my values and commitment to creating positive change.
+  What draws me to Tech Pipeline is the operator identity. I am not interested in building things that look good in demos but   break in production. I want to build the form that the accounts team opens every morning and never thinks about, because it just    works. That kind of invisible reliability is what I find satisfying to deliver.
 
-With my proven track record of delivering end-to-end solutions in the technology sector, I believe my skills and experience can be leveraged to drive meaningful outcomes in the health sector. Notably, my achievements include:
+  I am available immediately, fully remote-ready, and comfortable working across time zones without hand-holding.
+  
+  Yours sincerely,
 
-- Architecting and implementing a full-stack digital business platform using Neo4j and graph data science, resulting in improved scalability and extensibility for enterprise clients.
-- Developing and deploying machine learning-powered services with REST and GraphQL API endpoints, leading to improved predictive analytics and AI-driven products.
-- Leading full dashboard modernization efforts, migrating Power BI solutions to React-based platforms for enterprise integration, resulting in enhanced data insights and decision-making capabilities.
-
-I'm particularly drawn to this role at World Vision because of the organization's commitment to Christian humanitarian work and its focus on helping the most vulnerable children. As someone who is passionate about using technology to drive positive social impact, I believe I can contribute meaningfully to the team's efforts to improve MNCH outcomes in Wajir and Garissa.
-
-Thank you for considering my application. I'd be delighted to discuss this opportunity further and explore how my skills and experience can support the team's goals. Please feel free to contact me at +254 715 849 117 or millenialwitness@gmail.com.
-
-Yours sincerely,
-
-**Godwin Edgar Opuka**
-Solutions Architect & Financial Engineer
+  Godwin Edgar Opuka
+  Full-Stack Developer · linkedin.com/in/godwin-edgar-opuka

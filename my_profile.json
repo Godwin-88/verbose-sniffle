@@ -4,22 +4,24 @@
   "phone": "+254 715 849 117",
   "location": "Nairobi, Kenya",
   "linkedin": "linkedin.com/in/godwin-edgar-opuka",
+  "github": "github.com/Godwin-88",
+  "portfolio": "https://quantifaya.vercel.app/",
 
   "target_roles": [
     "Full-Stack Developer",
     "Solutions Architect",
     "AI/ML Engineer",
-    "Data Engineer",
     "Software Engineer",
     "Backend Developer",
+    "DevOps Engineer",
     "Financial Engineer",
-    "Business Intelligence Engineer"
+    "Data Engineer"
   ],
 
   "target_sectors": [
     "Technology",
-    "Financial Services",
     "Fintech",
+    "Financial Services",
     "NGO / INGO",
     "Consulting",
     "Government / Public Sector"
@@ -29,40 +31,31 @@
   "work_preferences": ["remote", "hybrid", "full-time"],
   "locations_ok": ["Nairobi", "Remote"],
 
-  "summary": "Full-Stack Solutions Architect, AI/ML Engineer, and Financial Engineer with proven experience designing and delivering end-to-end intelligent systems — from backend data pipelines and API layers through to React-based frontends and graph-powered analytics. Currently serving as Solutions Architect at DigitalQatalyst, owning the full development lifecycle of enterprise-scale digital platforms built on Neo4j, GraphQL/REST APIs, and MACH architecture principles. MSc Financial Engineering candidate at WorldQuant University with a strong quantitative foundation spanning stochastic calculus, derivative pricing, and ML in finance.",
-
-  "education": [
-    {
-      "degree": "MSc Financial Engineering",
-      "institution": "WorldQuant University",
-      "year": 2026,
-      "grade": "In Progress (Expected Apr 2026)",
-      "notes": "Coursework: Financial Data, Financial Markets, Derivative Pricing, Financial Econometrics, Stochastic Modeling, Machine Learning in Finance, Deep Learning for Finance. Currently enrolled: Portfolio Management. Remaining: Risk Management, Capstone."
-    },
-    {
-      "degree": "BSc Financial Engineering",
-      "institution": "Jomo Kenyatta University of Agriculture and Technology (JKUAT)",
-      "year": 2021,
-      "grade": "Completed Dec 2021",
-      "notes": "Mathematically intensive program covering Stochastic Calculus, Derivative Pricing, Game Theory, Statistical Inference, Linear Algebra, Numerical Methods, and Financial Theory."
-    }
-  ],
+  "summary": "Full-Stack Developer, Solutions Architect, and AI/ML Engineer with a strong record of owning end-to-end delivery of production-grade platforms — from Stellar-powered cross-border payment systems and AI-native ERPs to autonomous trading agents and legal knowledge graphs. Currently building Afripay, a borderless remittance platform at Zamadi Group, where I also lead DevOps and built the company's Learning Management System. MSc Financial Engineering candidate at WorldQuant University bridging quantitative finance and applied AI.",
 
   "experience": [
     {
+      "title": "Full-Stack Developer",
+      "company": "Zamadi Group",
+      "dates": "Dec 2025 – Present",
+      "bullets": [
+        "Lead engineer on Afripay — Zamadi's flagship borderless remittance and cross-border payment platform using the Stellar Network for settlement across multiple African currencies",
+        "Engineered the full-stack architecture: FastAPI backend, double-entry immutable ledger, JWT/refresh-token auth, Nginx rate limiting, React 19 admin workspace, and Flutter mobile app (Riverpod state management)",
+        "Integrated Onfido for 3-tier KYC/AML verification and built the FIAT-to-USDT settlement engine via Stellar Network",
+        "Built and deployed the NYS Virtual Campus — a full Learning Management System for the National Youth Service Kenya with role-based access for students, tutors, and administrators (React 18, Node.js, PostgreSQL, Drizzle ORM)",
+        "Own all DevOps: CI/CD pipelines, Docker containerisation, infrastructure provisioning, and deployment management across all Zamadi Group products"
+      ]
+    },
+    {
       "title": "Solutions Architect & BI Lead",
       "company": "DigitalQatalyst (Contract)",
-      "dates": "Jun 2025 – Present",
+      "dates": "Jun 2025 – Feb 2025",
       "bullets": [
         "Architecting the Twin Graph Manager — a graph-powered digital business platform modeling enterprise digital twins using Neo4j and graph data science",
-        "Designing and building full-stack platform architecture: Neo4j graph backend, GraphQL/REST API layer, Redux state management, and React component-driven frontend",
-        "Implementing microservices patterns and MACH-aligned architecture for platform scalability, composability, and extensibility",
-        "Architecting a full-stack Digital Intelligence & Analytics solution delivering descriptive, diagnostic, predictive, prescriptive, and deep intelligence capabilities",
-        "Building API-first data services (REST & GraphQL) with enterprise governance standards",
-        "Built graph-based intelligence solutions using Neo4j for relationship-centric analytics and decision intelligence",
-        "Oversaw enterprise architecture modeling using Ardoq and Abacus to align business capabilities with digital platforms",
-        "Directed deployment of AI agents for business process automation across multiple domains",
-        "Orchestrated migration of dashboards from Power BI to React-based solutions"
+        "Designing full-stack platform: Neo4j graph backend, GraphQL/REST API layer, Redux state management, React component-driven frontend with MACH-aligned architecture",
+        "Architecting a Digital Intelligence & Analytics solution delivering descriptive, diagnostic, predictive, and prescriptive intelligence capabilities",
+        "Built graph-based intelligence solutions using Neo4j; oversaw enterprise architecture modeling via Ardoq and Abacus",
+        "Directed AI agent deployment for business process automation; orchestrated migration of Power BI dashboards to React-based solutions"
       ]
     },
     {
@@ -71,7 +64,7 @@
       "dates": "Jun 2025 – Sep 2025",
       "bullets": [
         "Engineered end-to-end data pipelines using Python, R, Spark, and Microsoft Fabric",
-        "Developed and deployed ML-powered services with REST and GraphQL API endpoints including React frontend integration layers",
+        "Developed and deployed ML-powered services with REST and GraphQL endpoints including React frontend integration",
         "Designed feature engineering pipelines for predictive analytics and AI-driven products",
         "Built and maintained CI/CD pipelines for data, ML, and application workloads using Azure DevOps"
       ]
@@ -90,79 +83,129 @@
       "title": "Claims Analyst (Intern)",
       "company": "Madison Group Kenya",
       "dates": "Jul 2022 – Nov 2022",
-      "bullets": [
-        "Supported claims processing and analysis in insurance operations"
-      ]
+      "bullets": ["Supported claims processing and actuarial analysis in insurance operations"]
     },
     {
       "title": "Asset Management Analyst (Intern)",
       "company": "Nairobi County Government",
       "dates": "Jan 2022 – Mar 2022",
-      "bullets": [
-        "Supported asset tracking and management reporting for county government assets"
-      ]
+      "bullets": ["Supported asset tracking and management reporting"]
     },
     {
       "title": "Business Development Associate (Intern)",
       "company": "Favitech Solutions Ltd",
       "dates": "Oct 2020 – Mar 2021",
-      "bullets": [
-        "Supported business development initiatives and client engagement activities"
-      ]
+      "bullets": ["Supported business development and client engagement"]
     }
   ],
 
   "projects": [
     {
-      "name": "Market Signal Graph",
-      "dates": "Jan 2025 – Present",
-      "description": "Next-generation financial research tool combining vector search (pgvector on PostgreSQL) with graph data science (Neo4j) to uncover hidden market signals and surface non-obvious relationships in financial data."
-    },
-    {
-      "name": "High-Performance Derivatives Pricing Engine",
-      "dates": "Jan 2025 – Present",
-      "description": "Implemented mathematical pricing models in Rust with a FastAPI backend to compute derivative prices at high performance, bridging quantitative finance theory with production-grade engineering."
-    },
-    {
-      "name": "Job Hunter KE",
+      "name": "Afripay — Borderless Remittance Platform",
+      "company": "Zamadi Group",
       "dates": "2025 – Present",
-      "description": "Automated job application SaaS for the Kenyan market — scrapes listings, generates tailored CVs and cover letters using AI, and routes them through an n8n-powered review and dispatch workflow."
+      "github": "github.com/ZamadiGroup/Afripay",
+      "live": "https://afripaycustomerapp.vercel.app/",
+      "description": "Institutional-grade cross-border payment and digital wallet platform supporting 8+ African currencies. Features a Stellar Network settlement engine, double-entry immutable ledger, Onfido KYC/AML, React 19 admin workspace, and Flutter mobile app.",
+      "stack": ["FastAPI", "Python", "PostgreSQL", "Redis", "React 19", "Flutter", "Stellar", "Onfido", "Docker", "Nginx"]
+    },
+    {
+      "name": "NYS Virtual Campus — Learning Management System",
+      "company": "Zamadi Group",
+      "dates": "2025 – Present",
+      "github": "github.com/ZamadiGroup/NYSVirtualCampus",
+      "description": "Full-stack LMS for the National Youth Service Kenya. Role-based access for students, tutors, and administrators. Course management, assignment tracking, grading, and analytics.",
+      "stack": ["React 18", "TypeScript", "Node.js", "Express", "PostgreSQL", "Drizzle ORM", "Tailwind CSS"]
+    },
+    {
+      "name": "AMD EA Strategy Optimizer — AMD Developer Hackathon 2026",
+      "dates": "2026",
+      "live": "https://huggingface.co/spaces/TheQuantEd/EA_strat_optimizer",
+      "description": "AMD Developer Hackathon 2026 (Track 1 — AI Agents & Agentic Workflows). AI-powered Enterprise Architecture platform that transforms business goals into governance-grounded, Jira-ready strategic roadmaps. Powered by AMD Instinct MI300X running Qwen2.5-72B-Instruct via vLLM, a 1,416-capability Neo4j knowledge graph, Deep Reinforcement Learning (REINFORCE policy gradient) prioritisation, and a self-correcting LangGraph agentic pipeline with compliance verification loop.",
+      "stack": ["Python", "FastAPI", "Streamlit", "LangGraph", "Neo4j Aura", "PyTorch (ROCm)", "vLLM", "AMD MI300X", "Qwen2.5-72B", "sentence-transformers", "Docker"]
+    },
+    {
+      "name": "GraphAlpha — Autonomous xStocks Trading Agent",
+      "dates": "2025 – Present",
+      "github": "github.com/Godwin-88/sturdy-couscous",
+      "description": "WQU MScFE capstone. Production-grade agentic trading system grounded in a 324-concept financial knowledge graph (Memgraph). Five-agent pipeline: RegimeAgent, SignalAgent, RiskAgent, ExecutionAgent, ResearchAgent. GARCH(1,1) volatility, Half-Kelly position sizing, VaR enforcement, and Kraken xStocks execution.",
+      "stack": ["Python", "FastAPI", "React", "Memgraph", "LangGraph", "Redis", "PostgreSQL", "Docker", "Kraken API"]
+    },
+    {
+      "name": "Agentic ERP — AI-Native Enterprise Platform",
+      "dates": "2025 – Present",
+      "github": "github.com/Godwin-88/miniature-couscous",
+      "description": "Full-stack AI-native ERP in Go. Agent loop replaces form-driven workflows — users describe intent in natural language, AI selects the correct ERP tool, drafts actions for human approval. Modules: GL/AP/AR, HR, CRM, Supply Chain, Project Management. Ships as both web (Next.js 15) and desktop app (Wails v3).",
+      "stack": ["Go", "Next.js 15", "Wails v3", "Keycloak OIDC", "Casbin RBAC", "NATS JetStream", "Temporal", "Postgres", "ConnectRPC"]
+    },
+    {
+      "name": "Kenya Legal AI — Knowledge Graph & Fine-Tuning Pipeline",
+      "dates": "2025 – Present",
+      "github": "github.com/Godwin-88/potential-disco",
+      "description": "Ingests the Constitution of Kenya 2010 and statutory law into a Neo4j knowledge graph. Fine-tunes Mistral-7B via QLoRA on the graph data. GraphRAG retrieval with constitutional anchoring — every statute traceable to its constitutional basis via DERIVES_AUTHORITY_FROM relationships.",
+      "stack": ["Python", "Neo4j", "Mistral-7B", "QLoRA", "FastAPI", "Telegram Bot API", "WhatsApp Cloud API"]
+    },
+    {
+      "name": "Job Hunter KE — Automated Job Application SaaS",
+      "dates": "2025 – Present",
+      "github": "github.com/Godwin-88/verbose-sniffle",
+      "live": "https://jobappagent.vercel.app/",
+      "description": "Automated job and scholarship application platform for the Kenyan market. Scrapes listings from 10+ boards, generates tailored CVs and cover letters using Groq/LLaMA, routes through n8n workflows for review and dispatch via Gmail.",
+      "stack": ["Flask", "React", "SQLite", "n8n", "Postgres", "Docker", "Groq", "Vercel", "Supabase Auth"]
     }
   ],
 
   "skills": {
     "technical": [
-      "Python (pandas, scikit-learn, FastAPI, Flask)",
-      "R, Spark, SQL",
-      "React.js, Next.js, Node.js",
-      "Neo4j, Graph Modeling, Graph Algorithms",
-      "REST APIs, GraphQL APIs, Microservices",
-      "Machine Learning Pipelines, Feature Engineering, Model Deployment",
-      "AI Agent Development",
-      "Microsoft Fabric, Power BI, Azure Data Factory",
-      "MACH Architecture, Ardoq, Abacus",
-      "Azure DevOps, CI/CD Pipelines, Agile/Scrum",
-      "Rust (quantitative/systems programming)",
-      "Docker, Git",
-      "Stochastic Calculus, Derivative Pricing, Monte Carlo Simulation",
-      "GARCH, LSTM, Deep Learning for Finance"
+      "Python (FastAPI, Flask, pandas, scikit-learn)",
+      "Go (Chi, ConnectRPC, Temporal)",
+      "Rust (PyO3, Axum)",
+      "TypeScript / Node.js",
+      "React 18/19, Next.js 15, Flutter",
+      "SQL (PostgreSQL, MySQL), Redis",
+      "Neo4j, Memgraph, Graph Algorithms",
+      "REST APIs, GraphQL, gRPC, WebSockets",
+      "Stellar Network, Web3, DeFi",
+      "Machine Learning Pipelines, LangGraph, AI Agents",
+      "Docker, Kubernetes, CI/CD, Azure DevOps",
+      "Microsoft Fabric, Power BI",
+      "MACH Architecture, Microservices",
+      "Stochastic Calculus, Derivative Pricing, Monte Carlo",
+      "GARCH, LSTM, QLoRA fine-tuning"
     ],
     "soft": [
+      "End-to-end product ownership",
       "Solutions architecture",
+      "DevOps leadership",
       "Stakeholder communication",
-      "Technical leadership",
-      "End-to-end project ownership",
-      "Quantitative research communication"
+      "Quantitative research"
     ],
     "languages": ["English (fluent)", "Swahili (native)"]
   },
 
-  "certifications": [],
+  "education": [
+    {
+      "degree": "MSc Financial Engineering",
+      "institution": "WorldQuant University",
+      "year": 2026,
+      "grade": "In Progress (Expected Apr 2026)",
+      "notes": "Coursework: Financial Data, Derivative Pricing, Stochastic Modeling, ML in Finance, Deep Learning for Finance, Financial Econometrics. Currently: Portfolio Management. Remaining: Risk Management, Capstone (GraphAlpha)."
+    },
+    {
+      "degree": "BSc Financial Engineering",
+      "institution": "Jomo Kenyatta University of Agriculture and Technology (JKUAT)",
+      "year": 2021,
+      "grade": "Completed Dec 2021",
+      "notes": "Stochastic Calculus, Derivative Pricing, Game Theory, Statistical Inference, Numerical Methods."
+    }
+  ],
 
   "notable_achievements": [
-    "Promoted from Full-Stack Data Developer to Solutions Architect & BI Lead at DigitalQatalyst within 3 months (Sep 2025)",
-    "Architected Enterprise Architecture IP solution automating digital transformation through graph-powered analysis of digital capabilities",
-    "Led full dashboard modernization — migrated Power BI solutions to React-based platforms for enterprise integration"
+    "Built and deployed Afripay — a live Stellar-powered cross-border payment platform serving multiple African currencies",
+    "AMD Developer Hackathon 2026 entrant: built an EA Strategy Optimizer running Qwen2.5-72B on AMD MI300X with a 1,416-capability knowledge graph and DRL prioritisation",
+    "Promoted from Full-Stack Data Developer to Solutions Architect & BI Lead at DigitalQatalyst within 3 months",
+    "WQU MScFE capstone: GraphAlpha autonomous trading agent grounded in a 324-concept financial knowledge graph",
+    "Sole engineer for all Zamadi Group DevOps and infrastructure"
   ],
 
   "referees": [

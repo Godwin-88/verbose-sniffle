@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSearchParams } from 'react-router-dom';
 import { getJobs, scrapeJobs, generateJobDocs, deleteJob, markJobDispatched, searchJobs } from '@/api/jobs';
@@ -22,7 +22,11 @@ import {
 import { JobDetailPanel } from '@/components/jobs/JobDetailPanel';
 import { useQuickAction } from '@/hooks/useQuickAction';
 import { toast } from 'sonner';
-import { Search, Database, MoreHorizontal, FileText, ChevronLeft, ChevronRight, Send } from 'lucide-react';
+import {
+  Search, Database, MoreHorizontal, FileText,
+  ChevronLeft, ChevronRight, Send,
+  ChevronUp, ChevronDown, ChevronsUpDown,
+} from 'lucide-react';
 import { getStats } from '@/api/stats';
 
 const STATUS_TABS = [
@@ -35,6 +39,9 @@ const STATUS_TABS = [
 
 const PER_PAGE = 50;
 
+type SortKey = 'title' | 'company' | 'scraped_at' | 'source' | 'match_score';
+type SortDir = 'asc' | 'desc';
+
 function useDebounce<T>(value: T, delay: number): T {
   const [debounced, setDebounced] = useState(value);
   useEffect(() => {
@@ -42,6 +49,13 @@ function useDebounce<T>(value: T, delay: number): T {
     return () => clearTimeout(t);
   }, [value, delay]);
   return debounced;
+}
+
+function SortIcon({ col, sortKey, dir }: { col: SortKey; sortKey: SortKey; dir: SortDir }) {
+  if (col !== sortKey) return <ChevronsUpDown className="inline w-3 h-3 ml-1 opacity-30" />;
+  return dir === 'asc'
+    ? <ChevronUp className="inline w-3 h-3 ml-1" />
+    : <ChevronDown className="inline w-3 h-3 ml-1" />;
 }
 
 export default function Jobs() {
@@ -55,10 +69,12 @@ export default function Jobs() {
   const [page, setPage] = useState(1);
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
+  const [sourceFilter, setSourceFilter] = useState('all');
+  const [sortKey, setSortKey] = useState<SortKey>('scraped_at');
+  const [sortDir, setSortDir] = useState<SortDir>('desc');
 
   const debouncedSearch = useDebounce(search, 300);
 
-  // Sync URL → tab state
   useEffect(() => {
     const s = searchParams.get('status');
     if (s && s !== status) setStatus(s);
@@ -70,40 +86,75 @@ export default function Jobs() {
     setSearchParams({ status: s });
   };
 
-  // Main jobs query
+  const handleSort = (key: SortKey) => {
+    if (sortKey === key) {
+      setSortDir(d => d === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortKey(key);
+      setSortDir(key === 'scraped_at' ? 'desc' : 'asc');
+    }
+    setPage(1);
+  };
+
   const { data: jobsData, isLoading } = useQuery({
     queryKey: ['jobs', status, page],
     queryFn: () => getJobs({ status, page, per_page: PER_PAGE }),
     enabled: !debouncedSearch,
   });
 
-  // Search query
   const { data: searchResults, isLoading: searchLoading } = useQuery({
     queryKey: ['jobs-search', debouncedSearch],
     queryFn: () => searchJobs(debouncedSearch),
     enabled: !!debouncedSearch,
   });
 
-  const jobs: Job[] = debouncedSearch
+  const rawJobs: Job[] = debouncedSearch
     ? (searchResults || [])
     : (jobsData?.data || []);
+
+  // Client-side filter + sort
+  const jobs = useMemo(() => {
+    let list = sourceFilter !== 'all'
+      ? rawJobs.filter(j => j.source === sourceFilter)
+      : rawJobs;
+
+    list = [...list].sort((a, b) => {
+      let av: string | number = '';
+      let bv: string | number = '';
+      if (sortKey === 'match_score') {
+        av = a.match_score ?? -1;
+        bv = b.match_score ?? -1;
+      } else if (sortKey === 'scraped_at') {
+        av = a.scraped_at ?? '';
+        bv = b.scraped_at ?? '';
+      } else {
+        av = ((a as unknown as Record<string, unknown>)[sortKey] as string) ?? '';
+        bv = ((b as unknown as Record<string, unknown>)[sortKey] as string) ?? '';
+      }
+      if (av < bv) return sortDir === 'asc' ? -1 : 1;
+      if (av > bv) return sortDir === 'asc' ? 1 : -1;
+      return 0;
+    });
+    return list;
+  }, [rawJobs, sourceFilter, sortKey, sortDir]);
+
+  // Unique sources for filter dropdown
+  const sources = useMemo(() => {
+    const s = new Set(rawJobs.map(j => j.source).filter(Boolean));
+    return Array.from(s).sort();
+  }, [rawJobs]);
 
   const total: number = debouncedSearch ? jobs.length : (jobsData?.total || 0);
   const totalPages = Math.max(1, Math.ceil(total / PER_PAGE));
 
-  // Stats for tab badges
   const { data: stats } = useQuery({
     queryKey: ['stats'],
     queryFn: getStats,
     refetchInterval: 30000,
   });
 
-  const getBadge = (s: string) => {
-    if (!stats) return 0;
-    return stats.jobs?.[s] || 0;
-  };
+  const getBadge = (s: string) => stats?.jobs?.[s] || 0;
 
-  // Mutations
   const deleteMutation = useMutation({
     mutationFn: deleteJob,
     onSuccess: () => {
@@ -126,9 +177,9 @@ export default function Jobs() {
   const handleScrape = () => {
     const keywords = (localStorage.getItem('jh_settings_keywords') || '')
       .split(',').map(s => s.trim()).filter(Boolean);
-    const sources = JSON.parse(localStorage.getItem('jh_settings_sources') || '[]');
+    const srcs = JSON.parse(localStorage.getItem('jh_settings_sources') || '[]');
     run(
-      () => scrapeJobs({ keywords: keywords.length ? keywords : undefined, sources: sources.length ? sources : undefined }),
+      () => scrapeJobs({ keywords: keywords.length ? keywords : undefined, sources: srcs.length ? srcs : undefined }),
       'Scrape Jobs',
       [['jobs']]
     );
@@ -138,11 +189,7 @@ export default function Jobs() {
     run(() => generateJobDocs({}), 'Generate AI Docs', [['jobs']]);
   };
 
-  const isDeadlineSoon = (deadline: string) => {
-    if (!deadline) return false;
-    const d = new Date(deadline);
-    return !isNaN(d.getTime()) && d < new Date(Date.now() + 3 * 24 * 60 * 60 * 1000);
-  };
+  const thClass = 'cursor-pointer select-none hover:text-foreground transition-colors';
 
   return (
     <div className="space-y-5 pb-10">
@@ -182,7 +229,7 @@ export default function Jobs() {
       </Tabs>
 
       {/* Toolbar */}
-      <div className="flex items-center gap-3">
+      <div className="flex flex-wrap items-center gap-3">
         <div className="relative flex-1 max-w-sm">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
@@ -192,20 +239,18 @@ export default function Jobs() {
             className="pl-9"
           />
         </div>
-        <Select defaultValue="all">
-          <SelectTrigger className="w-40">
-            <SelectValue placeholder="Sector" />
+        <Select value={sourceFilter} onValueChange={(v) => { setSourceFilter(v); setPage(1); }}>
+          <SelectTrigger className="w-[150px]">
+            <SelectValue placeholder="Source" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All sectors</SelectItem>
-            <SelectItem value="technology">Technology</SelectItem>
-            <SelectItem value="ngo">NGO / INGO</SelectItem>
-            <SelectItem value="government">Government</SelectItem>
-            <SelectItem value="finance">Finance</SelectItem>
-            <SelectItem value="health">Health</SelectItem>
+            <SelectItem value="all">All sources</SelectItem>
+            {sources.map(s => (
+              <SelectItem key={s} value={s}>{s}</SelectItem>
+            ))}
           </SelectContent>
         </Select>
-        {debouncedSearch && (
+        {(sourceFilter !== 'all' || debouncedSearch) && (
           <span className="text-sm text-muted-foreground whitespace-nowrap">
             {jobs.length} result{jobs.length !== 1 ? 's' : ''}
           </span>
@@ -217,11 +262,21 @@ export default function Jobs() {
         <Table>
           <TableHeader>
             <TableRow className="bg-muted/50">
-              <TableHead>Title</TableHead>
-              <TableHead>Company</TableHead>
-              <TableHead>Deadline</TableHead>
-              <TableHead>Source</TableHead>
-              <TableHead className="w-[120px]">Match</TableHead>
+              <TableHead className={thClass} onClick={() => handleSort('title')}>
+                Title <SortIcon col="title" sortKey={sortKey} dir={sortDir} />
+              </TableHead>
+              <TableHead className={thClass} onClick={() => handleSort('company')}>
+                Company <SortIcon col="company" sortKey={sortKey} dir={sortDir} />
+              </TableHead>
+              <TableHead className={thClass} onClick={() => handleSort('scraped_at')}>
+                Date Posted <SortIcon col="scraped_at" sortKey={sortKey} dir={sortDir} />
+              </TableHead>
+              <TableHead className={thClass} onClick={() => handleSort('source')}>
+                Source <SortIcon col="source" sortKey={sortKey} dir={sortDir} />
+              </TableHead>
+              <TableHead className={`w-[120px] ${thClass}`} onClick={() => handleSort('match_score')}>
+                Match <SortIcon col="match_score" sortKey={sortKey} dir={sortDir} />
+              </TableHead>
               <TableHead>Status</TableHead>
               <TableHead className="w-[50px]" />
             </TableRow>
@@ -252,10 +307,10 @@ export default function Jobs() {
                     {job.title}
                   </TableCell>
                   <TableCell className="text-muted-foreground">{job.company}</TableCell>
-                  <TableCell
-                    className={isDeadlineSoon(job.deadline) ? 'text-red-500 font-semibold' : 'text-muted-foreground'}
-                  >
-                    {job.deadline || '—'}
+                  <TableCell className="text-muted-foreground text-sm whitespace-nowrap">
+                    {job.scraped_at
+                      ? new Date(job.scraped_at).toLocaleDateString('en-KE', { day: 'numeric', month: 'short', year: 'numeric' })
+                      : job.deadline || '—'}
                   </TableCell>
                   <TableCell>
                     <Badge variant="outline" className="text-xs font-normal">
@@ -309,31 +364,18 @@ export default function Jobs() {
         <div className="flex items-center justify-between text-sm text-muted-foreground">
           <span>{total} total · page {page} of {totalPages}</span>
           <div className="flex items-center gap-2">
-            <Button
-              variant="outline" size="sm"
-              onClick={() => setPage(p => Math.max(1, p - 1))}
-              disabled={page === 1}
-            >
+            <Button variant="outline" size="sm" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}>
               <ChevronLeft className="h-4 w-4" />
             </Button>
-            <Button
-              variant="outline" size="sm"
-              onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-              disabled={page === totalPages}
-            >
+            <Button variant="outline" size="sm" onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages}>
               <ChevronRight className="h-4 w-4" />
             </Button>
           </div>
         </div>
       )}
 
-      {/* Detail panel */}
-      <JobDetailPanel
-        jobId={selectedJobId}
-        onClose={() => setSelectedJobId(null)}
-      />
+      <JobDetailPanel jobId={selectedJobId} onClose={() => setSelectedJobId(null)} />
 
-      {/* Delete confirm */}
       <ConfirmDialog
         open={!!confirmDelete}
         title="Delete job?"

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSearchParams } from 'react-router-dom';
 import {
@@ -25,8 +25,21 @@ import {
 import { ScholarshipDetailPanel } from '@/components/scholarships/ScholarshipDetailPanel';
 import { useQuickAction } from '@/hooks/useQuickAction';
 import { toast } from 'sonner';
-import { Search, Database, MoreHorizontal, FileText, ChevronLeft, ChevronRight, Globe, Send } from 'lucide-react';
+import {
+  Search, Database, MoreHorizontal, FileText, ChevronLeft, ChevronRight, Globe, Send,
+  ChevronUp, ChevronDown, ChevronsUpDown,
+} from 'lucide-react';
 import { getStats } from '@/api/stats';
+
+type SortKey = 'title' | 'funder' | 'deadline' | 'level' | 'match_score';
+type SortDir = 'asc' | 'desc';
+
+function SortIcon({ col, sortKey, dir }: { col: SortKey; sortKey: SortKey; dir: SortDir }) {
+  if (col !== sortKey) return <ChevronsUpDown className="inline w-3 h-3 ml-1 opacity-30" />;
+  return dir === 'asc'
+    ? <ChevronUp className="inline w-3 h-3 ml-1" />
+    : <ChevronDown className="inline w-3 h-3 ml-1" />;
+}
 
 const STATUS_TABS = [
   { value: 'ready_for_review', label: 'Ready' },
@@ -67,6 +80,8 @@ export default function Scholarships() {
   const [level, setLevel] = useState('all');
   const [selectedScholId, setSelectedScholId] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
+  const [sortKey, setSortKey] = useState<SortKey>('deadline');
+  const [sortDir, setSortDir] = useState<SortDir>('asc');
 
   const debouncedSearch = useDebounce(search, 300);
 
@@ -79,6 +94,16 @@ export default function Scholarships() {
     setStatus(s);
     setPage(1);
     setSearchParams({ status: s });
+  };
+
+  const handleSort = (key: SortKey) => {
+    if (sortKey === key) {
+      setSortDir(d => d === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortKey(key);
+      setSortDir(key === 'deadline' ? 'asc' : 'asc');
+    }
+    setPage(1);
   };
 
   const { data: scholsData, isLoading } = useQuery({
@@ -100,9 +125,32 @@ export default function Scholarships() {
     enabled: !!debouncedSearch,
   });
 
-  const scholarships: Scholarship[] = debouncedSearch
+  const rawScholarships: Scholarship[] = debouncedSearch
     ? (searchResults || [])
     : (scholsData?.data || []);
+
+  const scholarships = useMemo(() => {
+    return [...rawScholarships].sort((a, b) => {
+      let av: string | number = '';
+      let bv: string | number = '';
+      if (sortKey === 'match_score') {
+        av = a.match_score ?? -1;
+        bv = b.match_score ?? -1;
+      } else if (sortKey === 'deadline') {
+        av = a.deadline ?? '';
+        bv = b.deadline ?? '';
+      } else if (sortKey === 'funder') {
+        av = (a.funder || a.company || '').toLowerCase();
+        bv = (b.funder || b.company || '').toLowerCase();
+      } else {
+        av = ((a as unknown as Record<string, unknown>)[sortKey] as string ?? '').toLowerCase();
+        bv = ((b as unknown as Record<string, unknown>)[sortKey] as string ?? '').toLowerCase();
+      }
+      if (av < bv) return sortDir === 'asc' ? -1 : 1;
+      if (av > bv) return sortDir === 'asc' ? 1 : -1;
+      return 0;
+    });
+  }, [rawScholarships, sortKey, sortDir]);
 
   const total: number = debouncedSearch ? scholarships.length : (scholsData?.total || 0);
   const totalPages = Math.max(1, Math.ceil(total / PER_PAGE));
@@ -248,13 +296,23 @@ export default function Scholarships() {
         <Table>
           <TableHeader>
             <TableRow className="bg-muted/50">
-              <TableHead>Title</TableHead>
-              <TableHead>Funder</TableHead>
+              <TableHead className="cursor-pointer select-none hover:text-foreground transition-colors" onClick={() => handleSort('title')}>
+                Title <SortIcon col="title" sortKey={sortKey} dir={sortDir} />
+              </TableHead>
+              <TableHead className="cursor-pointer select-none hover:text-foreground transition-colors" onClick={() => handleSort('funder')}>
+                Funder <SortIcon col="funder" sortKey={sortKey} dir={sortDir} />
+              </TableHead>
               <TableHead>Country</TableHead>
-              <TableHead>Level</TableHead>
+              <TableHead className="cursor-pointer select-none hover:text-foreground transition-colors" onClick={() => handleSort('level')}>
+                Level <SortIcon col="level" sortKey={sortKey} dir={sortDir} />
+              </TableHead>
               <TableHead>Funding</TableHead>
-              <TableHead>Deadline</TableHead>
-              <TableHead className="w-[120px]">Match</TableHead>
+              <TableHead className="cursor-pointer select-none hover:text-foreground transition-colors" onClick={() => handleSort('deadline')}>
+                Deadline <SortIcon col="deadline" sortKey={sortKey} dir={sortDir} />
+              </TableHead>
+              <TableHead className="w-[120px] cursor-pointer select-none hover:text-foreground transition-colors" onClick={() => handleSort('match_score')}>
+                Match <SortIcon col="match_score" sortKey={sortKey} dir={sortDir} />
+              </TableHead>
               <TableHead>Status</TableHead>
               <TableHead className="w-[50px]" />
             </TableRow>
