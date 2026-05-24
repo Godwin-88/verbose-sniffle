@@ -43,12 +43,18 @@ export function useQuickAction() {
               description: task.error || 'Unknown error',
             });
           }
-        } catch {
+        } catch (pollErr) {
           clearInterval(poll);
+          console.error(`[useQuickAction] poll error for ${label}:`, pollErr);
+          toast.error(`${label} — lost connection while polling`, { id: toastId });
         }
       }, 3000);
-    } catch {
-      toast.error(`Failed to start ${label}`, { id: toastId });
+    } catch (startErr) {
+      console.error(`[useQuickAction] failed to start ${label}:`, startErr);
+      const msg = (startErr as any)?.response?.data?.error
+        || (startErr as any)?.message
+        || 'Unknown error';
+      toast.error(`Failed to start ${label}`, { id: toastId, description: msg });
     }
   };
 

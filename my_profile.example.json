@@ -1,0 +1,89 @@
+{
+  "name": "Your Full Name",
+  "email": "you@example.com",
+  "phone": "+254 700 000 000",
+  "location": "Nairobi, Kenya",
+  "linkedin": "linkedin.com/in/your-profile",
+  "github": "github.com/your-username",
+  "portfolio": "https://your-portfolio.com",
+
+  "target_roles": [
+    "Software Engineer",
+    "Data Analyst",
+    "Backend Developer"
+  ],
+
+  "target_sectors": [
+    "Technology",
+    "Fintech",
+    "NGO / INGO"
+  ],
+
+  "min_salary_ksh": 100000,
+  "work_preferences": ["remote", "hybrid", "full-time"],
+  "locations_ok": ["Nairobi", "Remote"],
+
+  "summary": "Write a 2-3 sentence professional summary here. Focus on your strongest skills, current role, and what you bring to employers.",
+
+  "experience": [
+    {
+      "title": "Your Job Title",
+      "company": "Company Name",
+      "dates": "Jan 2024 – Present",
+      "bullets": [
+        "Key achievement or responsibility with measurable impact",
+        "Another bullet point describing what you built or delivered",
+        "Technologies or methodologies you used"
+      ]
+    }
+  ],
+
+  "projects": [
+    {
+      "name": "Project Name",
+      "dates": "2024",
+      "github": "github.com/your-username/project-repo",
+      "live": "https://your-project.vercel.app",
+      "description": "One sentence describing what the project does and why it matters.",
+      "stack": ["Python", "React", "PostgreSQL"]
+    }
+  ],
+
+  "skills": {
+    "technical": [
+      "Python",
+      "JavaScript / TypeScript",
+      "SQL (PostgreSQL, MySQL)",
+      "REST APIs",
+      "Docker"
+    ],
+    "soft": [
+      "Problem solving",
+      "Communication",
+      "Team collaboration"
+    ],
+    "languages": ["English (fluent)", "Swahili (native)"]
+  },
+
+  "education": [
+    {
+      "degree": "BSc Computer Science",
+      "institution": "University Name",
+      "year": 2022,
+      "grade": "Second Class Upper",
+      "notes": "Relevant coursework or specialisation"
+    }
+  ],
+
+  "notable_achievements": [
+    "Brief achievement that stands out — award, shipped product, promotion, etc."
+  ],
+
+  "referees": [
+    {
+      "name": "Referee Name",
+      "title": "Their Title, Organisation",
+      "phone": "+254 700 000 000"
+    }
+  ]
+}

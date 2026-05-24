@@ -91,8 +91,10 @@ REVIEW_EMAIL  = os.getenv("REVIEW_RECIPIENT_EMAIL", "")
 # ════════════════════════════════════════════════════════════════════════════
 app = Flask(__name__)
 
-# CORS — restrict to configured origin in production
-cors_origins = ALLOWED_ORIGIN if ALLOWED_ORIGIN != "*" else "*"
+# CORS — allow configured origin plus local dev ports 5173/5174
+_local_dev = ["http://localhost:5173", "http://localhost:5174",
+              "http://127.0.0.1:5173", "http://127.0.0.1:5174"]
+cors_origins = ([ALLOWED_ORIGIN] + _local_dev) if ALLOWED_ORIGIN != "*" else "*"
 CORS(app, origins=cors_origins, allow_headers=["Content-Type", "X-API-Key"])
 
 db       = JobDB(DB_PATH)
