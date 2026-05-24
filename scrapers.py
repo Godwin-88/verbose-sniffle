@@ -539,15 +539,16 @@ def scrape_weworkremotely(keyword: str) -> List[Dict]:
     feeds = [
         "https://weworkremotely.com/categories/remote-programming-jobs.rss",
         "https://weworkremotely.com/categories/remote-devops-sysadmin-jobs.rss",
-        "https://weworkremotely.com/categories/remote-data-science-jobs.rss",
         "https://weworkremotely.com/categories/remote-product-jobs.rss",
-        "https://weworkremotely.com/categories/remote-finance-legal-jobs.rss",
+        "https://weworkremotely.com/remote-jobs.rss",  # full feed covers all categories
     ]
     kw_lower = keyword.lower()
     for feed_url in feeds:
         try:
-            r = _get_with_retry(feed_url, headers=HEADERS, timeout=20)
+            r = requests.get(feed_url, headers=HEADERS, timeout=20, allow_redirects=True)
             r.raise_for_status()
+            if not r.content.strip():
+                continue
             root = ET.fromstring(r.content)
             for item in root.findall(".//item"):
                 title   = (item.findtext("title") or "").strip()
@@ -581,52 +582,53 @@ def scrape_weworkremotely(keyword: str) -> List[Dict]:
 
 def scrape_remoteforafrica(keyword: str) -> List[Dict]:
     """
-    Remote for Africa — remoteforafrica.com
-    Targets remote roles open to African candidates.
+    Remote for Africa — remoteforafrica.com (React/MUI site)
+    Scrapes the /jobs listing page (no JS needed for initial HTML) and
+    filters by keyword across title + visible card text.
     """
     jobs = []
-    urls = [
-        f"https://remoteforafrica.com/?s={_enc(keyword)}",
-        "https://remoteforafrica.com/jobs/",
-    ]
     kw_lower = keyword.lower()
-    seen_urls: set = set()
-    for url in urls:
-        soup = _get_soup(url)
-        if not soup:
+    seen: set = set()
+
+    # The site renders job cards server-side on /jobs — no JS needed for listing
+    soup = _get_soup("https://remoteforafrica.com/jobs")
+    if not soup:
+        return jobs
+
+    # Cards are <a href="/jobs/slug"> inside MUI Box divs
+    # Each card's ancestor at ~level 2 contains company, title, location, date
+    for a in soup.find_all("a", href=lambda h: h and h.startswith("/jobs/")):
+        href = "https://remoteforafrica.com" + a["href"]
+        if href in seen:
             continue
-        # Try multiple card patterns used by the WordPress-based site
-        cards = (
-            soup.select("article.job_listing")
-            or soup.select("li.job_listing")
-            or soup.select("div.job_listing")
-            or soup.select("article")
-        )
-        for card in cards:
-            title_el = (
-                card.select_one("h3 a, h2 a, .job-title a, a.position")
-                or card.select_one("a[href]")
-            )
-            if not title_el:
-                continue
-            title = title_el.get_text(strip=True)
-            href  = title_el.get("href", "")
-            if not href or href in seen_urls:
-                continue
-            text = (title + " " + card.get_text()).lower()
-            if kw_lower not in text:
-                continue
-            seen_urls.add(href)
-            jobs.append({
-                "title":    title,
-                "company":  _text(card, ".company, .company-name, strong") or "—",
-                "url":      href,
-                "location": _text(card, ".location, .job-location") or "Remote · Africa",
-                "deadline": _text(card, ".date, time, .deadline") or "",
-                "snippet":  _text(card, ".job-description, p") or "",
-                "sector":   "remote",
-            })
-        _polite_delay()
+
+        # Walk up two levels to get the full card text
+        card = a.parent.parent if a.parent and a.parent.parent else a.parent
+        card_text = card.get_text(separator="|", strip=True) if card else a.get_text(strip=True)
+
+        if kw_lower not in card_text.lower():
+            continue
+
+        seen.add(href)
+        # Card text format: "Company|Title|Location|type|Country|...|Date"
+        parts = [p.strip() for p in card_text.split("|") if p.strip()]
+        title   = a.get_text(strip=True) or (parts[1] if len(parts) > 1 else "")
+        company = parts[0] if parts else "—"
+        location = next((p for p in parts if "remote" in p.lower() or any(
+            c in p for c in ["Nigeria","Kenya","Ghana","Africa","South Africa","Egypt","Remote"]
+        )), "Remote · Africa")
+        date = next((p for p in reversed(parts) if re.match(r"(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+\d", p)), "")
+
+        jobs.append({
+            "title":    title,
+            "company":  company,
+            "url":      href,
+            "location": location,
+            "deadline": date,
+            "snippet":  card_text[:300],
+            "sector":   "remote",
+        })
+
     return jobs
 
 
@@ -644,16 +646,22 @@ def scrape_himalayas(keyword: str) -> List[Dict]:
         )
         r.raise_for_status()
         data = r.json()
-        for item in (data.get("jobs") or data if isinstance(data, list) else []):
+        items = data.get("jobs") if isinstance(data, dict) else data
+        if not isinstance(items, list):
+            return jobs
+        for item in items:
             if not isinstance(item, dict):
                 continue
+            location = item.get("locationRestrictions")
+            if isinstance(location, list):
+                location = ", ".join(location) if location else "Remote (Worldwide)"
             jobs.append({
                 "title":    item.get("title", ""),
                 "company":  item.get("companyName") or item.get("company", ""),
-                "url":      item.get("applicationLink") or item.get("url", ""),
-                "location": item.get("locationRestrictions") or "Remote",
-                "deadline": (item.get("createdAt") or "")[:10],
-                "snippet":  (item.get("description") or "")[:400],
+                "url":      item.get("applicationLink") or item.get("guid", ""),
+                "location": location or "Remote (Worldwide)",
+                "deadline": _ts_to_date(item.get("pubDate")),
+                "snippet":  (item.get("excerpt") or item.get("description") or "")[:400],
                 "sector":   "remote",
             })
     except Exception as e:
@@ -664,6 +672,20 @@ def scrape_himalayas(keyword: str) -> List[Dict]:
 # ════════════════════════════════════════════════════════════════════════════
 # SHARED HELPERS
 # ════════════════════════════════════════════════════════════════════════════
+
+def _ts_to_date(ts) -> str:
+    """Convert a Unix timestamp (int or str) or ISO date string to YYYY-MM-DD."""
+    if not ts:
+        return ""
+    try:
+        if isinstance(ts, (int, float)):
+            import datetime
+            return datetime.datetime.utcfromtimestamp(ts).strftime("%Y-%m-%d")
+        return str(ts)[:10]
+    except Exception:
+        return ""
+
+
 def _get_soup(url: str) -> BeautifulSoup | None:
     try:
         r = _get_with_retry(url, headers=HEADERS, timeout=20)
