@@ -15,8 +15,11 @@ import { toast } from 'sonner';
 import { Bell, Database, Send, CheckCircle2, Clock, AlertTriangle } from 'lucide-react';
 
 const JOB_SOURCES = [
+  // Kenya
   'BrighterMonday', 'Fuzu', 'LinkedIn', 'GAA', 'NEAIMS',
   'MyJobMag', 'JobWebKenya', 'CareersInKenya', 'NGOJobsKenya', 'Reddit',
+  // Remote / Global
+  'RemoteOK', 'WeWorkRemotely', 'RemoteForAfrica', 'Himalayas',
 ];
 
 function usePersisted<T>(key: string, initial: T): [T, (v: T) => void] {

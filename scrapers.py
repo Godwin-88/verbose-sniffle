@@ -18,6 +18,12 @@ Scrapers for:
       • LinkedIn      (public guest endpoint)
       • Reddit        (PRAW — r/KenyaJobs, r/forhire, r/jobbit)
 
+  🌍 Remote / Global Tech
+      • RemoteOK      (public JSON API)
+      • WeWorkRemotely (RSS feed)
+      • RemoteForAfrica (HTML — African remote roles)
+      • Himalayas     (public JSON API)
+
 pip install requests beautifulsoup4 praw python-dotenv
 Optional: pip install playwright && playwright install chromium
 """
@@ -58,12 +64,17 @@ def scrape_all(keywords: List[str], sources: List[str]) -> List[Dict]:
         "careersinkenya": scrape_careersinkenya,
         "ngojobskenya":   scrape_ngojobs,
         # Global / social
-        "linkedin":       scrape_linkedin_public,
-        "reddit":         scrape_reddit,
+        "linkedin":         scrape_linkedin_public,
+        "reddit":           scrape_reddit,
+        # Remote / global tech
+        "remoteok":         scrape_remoteok,
+        "weworkremotely":   scrape_weworkremotely,
+        "remoteforafrica":  scrape_remoteforafrica,
+        "himalayas":        scrape_himalayas,
     }
     results = []
     for source in sources:
-        fn = scrapers.get(source)
+        fn = scrapers.get(source) or scrapers.get(source.lower().replace(" ", "").replace("-", ""))
         if not fn:
             log.warning(f"No scraper registered for '{source}'")
             continue
@@ -471,6 +482,182 @@ def scrape_reddit(keyword: str) -> List[Dict]:
                 log.warning(f"Reddit r/{sub}: {e}")
     except Exception as e:
         log.error(f"Reddit PRAW init error: {e}")
+    return jobs
+
+
+# ════════════════════════════════════════════════════════════════════════════
+# 🌍 REMOTE / GLOBAL TECH BOARDS
+# ════════════════════════════════════════════════════════════════════════════
+
+def scrape_remoteok(keyword: str) -> List[Dict]:
+    """
+    RemoteOK public JSON API — remoteok.com/api
+    No auth required. Returns all remote tech listings; filtered client-side by keyword.
+    """
+    jobs = []
+    try:
+        r = _get_with_retry(
+            "https://remoteok.com/api",
+            headers={**HEADERS, "Accept": "application/json"},
+            timeout=30,
+        )
+        r.raise_for_status()
+        data = r.json()
+        kw_lower = keyword.lower()
+        for item in data:
+            if not isinstance(item, dict) or not item.get("position"):
+                continue
+            text = " ".join([
+                item.get("position", ""),
+                item.get("company", ""),
+                " ".join(item.get("tags", [])),
+                item.get("description", ""),
+            ]).lower()
+            if kw_lower not in text:
+                continue
+            jobs.append({
+                "title":    item.get("position", ""),
+                "company":  item.get("company", ""),
+                "url":      item.get("url") or f"https://remoteok.com/remote-jobs/{item.get('id','')}",
+                "location": "Remote",
+                "deadline": item.get("date", "")[:10] if item.get("date") else "",
+                "snippet":  (item.get("description") or "")[:400],
+                "sector":   "remote",
+            })
+    except Exception as e:
+        log.error(f"RemoteOK error: {e}")
+    return jobs
+
+
+def scrape_weworkremotely(keyword: str) -> List[Dict]:
+    """
+    We Work Remotely RSS feeds — programming, devops, design, product, data science.
+    No auth required.
+    """
+    import xml.etree.ElementTree as ET
+    jobs = []
+    feeds = [
+        "https://weworkremotely.com/categories/remote-programming-jobs.rss",
+        "https://weworkremotely.com/categories/remote-devops-sysadmin-jobs.rss",
+        "https://weworkremotely.com/categories/remote-data-science-jobs.rss",
+        "https://weworkremotely.com/categories/remote-product-jobs.rss",
+        "https://weworkremotely.com/categories/remote-finance-legal-jobs.rss",
+    ]
+    kw_lower = keyword.lower()
+    for feed_url in feeds:
+        try:
+            r = _get_with_retry(feed_url, headers=HEADERS, timeout=20)
+            r.raise_for_status()
+            root = ET.fromstring(r.content)
+            for item in root.findall(".//item"):
+                title   = (item.findtext("title") or "").strip()
+                link    = (item.findtext("link") or "").strip()
+                company = (item.findtext("company") or "").strip()
+                pub     = (item.findtext("pubDate") or "")[:16]
+                desc    = (item.findtext("description") or "")[:400]
+                region  = (item.findtext("region") or "Worldwide")
+                text    = f"{title} {company} {desc}".lower()
+                if kw_lower not in text:
+                    continue
+                # WWR encodes title as "CompanyName: JobTitle"
+                if ":" in title and not company:
+                    parts   = title.split(":", 1)
+                    company = parts[0].strip()
+                    title   = parts[1].strip()
+                jobs.append({
+                    "title":    title,
+                    "company":  company,
+                    "url":      link,
+                    "location": f"Remote · {region}",
+                    "deadline": pub,
+                    "snippet":  desc,
+                    "sector":   "remote",
+                })
+            _polite_delay()
+        except Exception as e:
+            log.warning(f"WeWorkRemotely feed {feed_url}: {e}")
+    return jobs
+
+
+def scrape_remoteforafrica(keyword: str) -> List[Dict]:
+    """
+    Remote for Africa — remoteforafrica.com
+    Targets remote roles open to African candidates.
+    """
+    jobs = []
+    urls = [
+        f"https://remoteforafrica.com/?s={_enc(keyword)}",
+        "https://remoteforafrica.com/jobs/",
+    ]
+    kw_lower = keyword.lower()
+    seen_urls: set = set()
+    for url in urls:
+        soup = _get_soup(url)
+        if not soup:
+            continue
+        # Try multiple card patterns used by the WordPress-based site
+        cards = (
+            soup.select("article.job_listing")
+            or soup.select("li.job_listing")
+            or soup.select("div.job_listing")
+            or soup.select("article")
+        )
+        for card in cards:
+            title_el = (
+                card.select_one("h3 a, h2 a, .job-title a, a.position")
+                or card.select_one("a[href]")
+            )
+            if not title_el:
+                continue
+            title = title_el.get_text(strip=True)
+            href  = title_el.get("href", "")
+            if not href or href in seen_urls:
+                continue
+            text = (title + " " + card.get_text()).lower()
+            if kw_lower not in text:
+                continue
+            seen_urls.add(href)
+            jobs.append({
+                "title":    title,
+                "company":  _text(card, ".company, .company-name, strong") or "—",
+                "url":      href,
+                "location": _text(card, ".location, .job-location") or "Remote · Africa",
+                "deadline": _text(card, ".date, time, .deadline") or "",
+                "snippet":  _text(card, ".job-description, p") or "",
+                "sector":   "remote",
+            })
+        _polite_delay()
+    return jobs
+
+
+def scrape_himalayas(keyword: str) -> List[Dict]:
+    """
+    Himalayas public jobs API — himalayas.app
+    Strong coverage of remote AI/ML, fintech, full-stack, and data engineering roles.
+    """
+    jobs = []
+    try:
+        r = _get_with_retry(
+            f"https://himalayas.app/jobs/api?q={_enc(keyword)}&limit=50",
+            headers={**HEADERS, "Accept": "application/json"},
+            timeout=30,
+        )
+        r.raise_for_status()
+        data = r.json()
+        for item in (data.get("jobs") or data if isinstance(data, list) else []):
+            if not isinstance(item, dict):
+                continue
+            jobs.append({
+                "title":    item.get("title", ""),
+                "company":  item.get("companyName") or item.get("company", ""),
+                "url":      item.get("applicationLink") or item.get("url", ""),
+                "location": item.get("locationRestrictions") or "Remote",
+                "deadline": (item.get("createdAt") or "")[:10],
+                "snippet":  (item.get("description") or "")[:400],
+                "sector":   "remote",
+            })
+    except Exception as e:
+        log.error(f"Himalayas error: {e}")
     return jobs
 
 
